@@ -1,0 +1,30 @@
+{
+  "name": "touristvisaexperts-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Tourist Visa Experts — Unified Full-Stack Platform Monorepo",
+  "workspaces": [
+    "touristvisaexperts-backend",
+    "touristvisaexperts-portal",
+    "touristvisaexperts-website"
+  ],
+  "scripts": {
+    "install:all": "npm install --prefix touristvisaexperts-backend && npm install --prefix touristvisaexperts-portal && npm install --prefix touristvisaexperts-website",
+    "dev:backend": "npm run dev --prefix touristvisaexperts-backend",
+    "dev:portal": "npm run dev --prefix touristvisaexperts-portal",
+    "dev:website": "npm run dev --prefix touristvisaexperts-website",
+    "build:portal": "npm run build --prefix touristvisaexperts-portal",
+    "build:website": "npm run build --prefix touristvisaexperts-website"
+  },
+  "keywords": [
+    "tourist-visa",
+    "monorepo",
+    "express",
+    "react",
+    "vite",
+    "mongodb",
+    "razorpay"
+  ],
+  "author": "Anarav Engineering",
+  "license": "UNLICENSED"
+}

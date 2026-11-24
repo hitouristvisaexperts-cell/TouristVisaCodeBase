@@ -1,0 +1,404 @@
+/* ══════════════════════════════════════════════════════
+   Our Services – clean white, Magic UI card effects
+   ══════════════════════════════════════════════════════ */
+
+@property --ba {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+/* ─── Section ──────────────────────────────────────── */
+.section {
+  background: #fff;
+  padding: 20px 0 100px;
+  position: relative;
+  overflow: hidden;
+}
+.bgGlow1 {
+  position: absolute;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(37,99,235,0.055) 0%, transparent 70%);
+  top: -180px; left: -200px;
+  pointer-events: none;
+}
+.bgGlow2 {
+  position: absolute;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(249,115,22,0.045) 0%, transparent 70%);
+  bottom: -120px; right: -150px;
+  pointer-events: none;
+}
+
+/* ─── Container ────────────────────────────────────── */
+.container {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 32px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── Eyebrow ──────────────────────────────────────── */
+.eyebrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.eyebrowLine {
+  width: 30px; height: 1.5px;
+  background: #F97316;
+  border-radius: 2px;
+}
+.eyebrowText {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2.2px;
+  text-transform: uppercase;
+  color: #F97316;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* ─── Heading ──────────────────────────────────────── */
+.heading {
+  text-align: center;
+  font-size: clamp(30px, 4vw, 50px);
+  font-weight: 800;
+  color: #0A1628;
+  line-height: 1.1;
+  margin-bottom: 12px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -0.02em;
+}
+.subtitle {
+  text-align: center;
+  font-size: 15px;
+  color: #64748B;
+  margin-bottom: 28px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* ─── Grid ─────────────────────────────────────────── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+/* ─── Card ─────────────────────────────────────────── */
+.card {
+  --ba: 0deg;
+  position: relative;
+  border-radius: 20px;
+  background: #fff;
+  border: 1.5px solid #E5E7EB;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  cursor: default;
+
+  transform: perspective(1000px) rotateX(var(--tx, 0deg)) rotateY(var(--ty, 0deg)) translateZ(0);
+  transition: transform 0.12s ease-out, box-shadow 0.3s ease, border-color 0.3s ease;
+  box-shadow: 0 1px 8px rgba(10,22,40,0.06), 0 2px 4px rgba(10,22,40,0.04);
+  will-change: transform;
+}
+
+/* Rotating Magic UI border */
+.card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  padding: 1.5px;
+  background: conic-gradient(
+    from var(--ba),
+    transparent 18%,
+    var(--glow-color, #2563EB) 42%,
+    transparent 62%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+  z-index: 10;
+}
+.card:hover::after {
+  opacity: 1;
+  animation: borderSpin 3s linear infinite;
+}
+@keyframes borderSpin {
+  to { --ba: 360deg; }
+}
+
+.card:hover {
+  border-color: transparent;
+  box-shadow:
+    0 0 0 1.5px rgba(var(--glow-rgb, 37,99,235), 0.18),
+    0 20px 50px rgba(10,22,40,0.1),
+    0 6px 16px rgba(var(--glow-rgb, 37,99,235), 0.12);
+  transform:
+    perspective(1000px)
+    rotateX(var(--tx, 0deg))
+    rotateY(var(--ty, 0deg))
+    translateY(-8px)
+    translateZ(0);
+}
+
+.cardBlue   { --glow-color: #2563EB; --glow-rgb: 37,99,235; }
+.cardOrange { --glow-color: #F97316; --glow-rgb: 249,115,22; }
+.cardViolet { --glow-color: #7C3AED; --glow-rgb: 124,58,237; }
+
+/* ─── Spotlight ────────────────────────────────────── */
+.spotlight {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    280px circle at var(--sx, 50%) var(--sy, 50%),
+    rgba(var(--glow-rgb, 37,99,235), 0.06),
+    transparent 70%
+  );
+  opacity: var(--sa, 0);
+  transition: opacity 0.3s;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ─── Card Body ────────────────────────────────────── */
+.body {
+  padding: 28px 24px 26px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  position: relative;
+  z-index: 2;
+}
+
+/* Step + top row */
+.cardTop {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+.stepBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: #F1F5F9;
+  border: 1.5px solid #E2E8F0;
+  color: #64748B;
+  font-size: 11px;
+  font-weight: 800;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  transition: background 0.25s, color 0.25s;
+}
+.card:hover .stepBadge {
+  background: var(--glow-color, #2563EB);
+  border-color: var(--glow-color, #2563EB);
+  color: #fff;
+}
+
+/* ─── Icon Badge ───────────────────────────────────── */
+.iconBadge {
+  width: 84px; height: 84px;
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 22px;
+  flex-shrink: 0;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease;
+}
+.card:hover .iconBadge {
+  transform: translateY(-6px) scale(1.08) rotate(-2deg);
+}
+
+.ringBlue   {
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+  box-shadow: 0 6px 20px rgba(37,99,235,0.2), 0 2px 8px rgba(37,99,235,0.12);
+}
+.card.cardBlue:hover .ringBlue {
+  box-shadow: 0 12px 32px rgba(37,99,235,0.32);
+}
+.ringOrange {
+  background: linear-gradient(135deg, #FFF7ED 0%, #FED7AA 100%);
+  box-shadow: 0 6px 20px rgba(249,115,22,0.2), 0 2px 8px rgba(249,115,22,0.12);
+}
+.card.cardOrange:hover .ringOrange {
+  box-shadow: 0 12px 32px rgba(249,115,22,0.32);
+}
+.ringViolet {
+  background: linear-gradient(135deg, #F5F3FF 0%, #EDE9FE 100%);
+  box-shadow: 0 6px 20px rgba(124,58,237,0.2), 0 2px 8px rgba(124,58,237,0.12);
+}
+.card.cardViolet:hover .ringViolet {
+  box-shadow: 0 12px 32px rgba(124,58,237,0.32);
+}
+
+.iconSvg { width: 50px; height: 50px; }
+
+/* ─── Text ─────────────────────────────────────────── */
+.cardTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0A1628;
+  margin-bottom: 10px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.cardDesc {
+  font-size: 13.5px;
+  color: #64748B;
+  line-height: 1.75;
+  flex: 1;
+  margin-bottom: 24px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* ─── Footer ───────────────────────────────────────── */
+.cardFooter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ─── Premium Gradient Button ──────────────────────── */
+.premiumBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13.5px;
+  font-weight: 700;
+  padding: 12px 24px;
+  border-radius: 100px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: #fff;
+  letter-spacing: 0.01em;
+  transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+.premiumBtn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(rgba(255,255,255,0.2) 0%, transparent 100%);
+  pointer-events: none;
+}
+.premiumBtn:hover {
+  transform: translateY(-2px) scale(1.03);
+}
+.premiumBtn:active {
+  transform: translateY(0) scale(0.98);
+}
+.btnArrow {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+.premiumBtn:hover .btnArrow {
+  transform: translateX(3px);
+}
+
+/* ─── Pills ────────────────────────────────────────── */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 11px;
+  border-radius: 100px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  white-space: nowrap;
+}
+.pillBlue   { background: #EFF6FF; color: #2563EB; }
+.pillOrange { background: #FFF7ED; color: #C2410C; }
+.pillViolet { background: #F5F3FF; color: #7C3AED; }
+
+/* ─── Trust Strip ──────────────────────────────────── */
+.trustStrip {
+  display: flex;
+  align-items: center;
+  margin-top: 52px;
+  background: #F8F9FB;
+  border-radius: 16px;
+  border: 1px solid #E5E7EB;
+  overflow: hidden;
+}
+.trustItem {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 20px;
+  border-right: 1px solid #E5E7EB;
+  transition: background 0.2s;
+}
+.trustItem:last-child { border-right: none; }
+.trustItem:hover { background: #fff; }
+.trustIcon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 1px 4px rgba(10,22,40,0.06);
+}
+.trustLabel {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #0A1628;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.trustSub {
+  font-size: 11px;
+  color: #94A3B8;
+  font-weight: 500;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* ─── View All ─────────────────────────────────────── */
+.viewAllWrap { display: flex; justify-content: center; margin-top: 40px; }
+.viewAllBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #0A1628;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 14px 36px;
+  border-radius: 100px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s, gap 0.2s;
+  box-shadow: 0 4px 16px rgba(10,22,40,0.2);
+}
+.viewAllBtn:hover {
+  background: #1a2f4a;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(10,22,40,0.28);
+  gap: 12px;
+}
+
+/* ─── Responsive ───────────────────────────────────── */
+@media (max-width: 900px) {
+  .grid { grid-template-columns: 1fr; max-width: 440px; margin: 0 auto; }
+  .trustStrip { flex-direction: column; }
+  .trustItem  { border-right: none; border-bottom: 1px solid #E5E7EB; }
+  .trustItem:last-child { border-bottom: none; }
+  .card { transform: none !important; }
+  .card:hover { transform: translateY(-6px) !important; }
+}
