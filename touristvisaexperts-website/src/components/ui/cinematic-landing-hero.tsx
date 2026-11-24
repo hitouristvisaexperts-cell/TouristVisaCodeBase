@@ -184,7 +184,7 @@ export function CinematicHero({
   cardHeading = "Visa approvals, redefined.",
   cardDescription = (
     <>
-      <span className="text-white font-semibold">Travel Visa Expert</span>{" "}
+      <span className="text-white font-semibold">Tourist Visa Experts</span>{" "}
       provides end-to-end visa assistance — from document review and flight
       reservations to embassy submission, with a high success rate and a
       commitment to transparency.

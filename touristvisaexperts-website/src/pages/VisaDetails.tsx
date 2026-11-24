@@ -589,7 +589,7 @@ function VdWhyUs() {
             <BadgeCheck className="w-3 h-3" /> Why Us
           </div>
           <h2 className="text-3xl font-black text-slate-900 leading-tight">
-            Benefits of Indians Travel Visa
+            Benefits of Tourist Visa Experts
           </h2>
           <p className="text-2xl font-black text-orange-500 leading-tight mt-0.5">Over Other Services</p>
         </motion.div>

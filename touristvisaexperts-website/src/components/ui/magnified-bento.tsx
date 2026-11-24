@@ -32,7 +32,7 @@ const TAG_ROWS = [
 ];
 
 const CONFIG = {
-  title: "Benefits of Indians Travel Visa",
+  title: "Benefits of Tourist Visa Experts",
   description:
     "Your dedicated visa specialist handles everything — real travelers with real experience across 50+ countries, working specifically on your case from start to approval.",
   containerHeight: "h-[200px] sm:h-[240px]",
