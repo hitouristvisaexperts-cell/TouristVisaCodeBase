@@ -712,7 +712,7 @@ export default function AdminClientDetail() {
                       fontSize:13, fontWeight:700, color:'rgba(100,116,139,0.18)',
                       transform:'rotate(-30deg)', whiteSpace:'nowrap', userSelect:'none',
                     }}>
-                      CONFIDENTIAL · TRAVEL TOURIST VISA EXPERT
+                      CONFIDENTIAL · TOURIST VISA EXPERTS
                     </span>
                   ))}
                 </div>

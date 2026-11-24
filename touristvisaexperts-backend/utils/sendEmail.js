@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
 
-const REGISTERED_OFFICE = 'Namaste Travel Amigo Private Limited, 5-894, Santhapet, Dongalabavi Street, Chittoor North, Chittoor, Andhra Pradesh – 517004, India';
+const REGISTERED_OFFICE = 'Tourist Visa Experts, 5-894, Netaji Subhash Chandra Bose Street, Santapeta, Chittoor, Andhra Pradesh 517004, India';
 const SITE_URL = process.env.SITE_URL || 'https://touristvisaexperts.com';
 
 function complianceFooter() {

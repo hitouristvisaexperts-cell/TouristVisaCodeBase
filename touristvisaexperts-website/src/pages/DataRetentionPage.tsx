@@ -35,7 +35,7 @@ export default function DataRetentionPage() {
   return (
     <LegalPageLayout
       title="Data Retention Policy"
-      intro={'"Tourist Visa Experts" is a brand and website operated by Namaste Travel Amigo Private Limited. This Policy explains how long we keep your data and why. It should be read with our Privacy Policy.'}
+      intro={'"Tourist Visa Experts" operates this website and provides visa consultancy services. This Policy explains how long we keep your data and why. It should be read with our Privacy Policy.'}
       sections={SECTIONS}
     />
   )

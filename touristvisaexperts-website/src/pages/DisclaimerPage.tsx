@@ -47,7 +47,7 @@ export default function DisclaimerPage() {
   return (
     <LegalPageLayout
       title="Disclaimer"
-      intro={'"Tourist Visa Experts" is a brand and website operated by Namaste Travel Amigo Private Limited. This Disclaimer forms part of our Terms & Conditions.'}
+      intro={'"Tourist Visa Experts" operates this website and provides visa consultancy services. This Disclaimer forms part of our Terms & Conditions.'}
       sections={SECTIONS}
     />
   )
