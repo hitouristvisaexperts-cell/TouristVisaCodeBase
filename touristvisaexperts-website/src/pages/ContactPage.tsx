@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'motion/react'
 import { toast } from 'sonner'
-import { Mail, MapPin, Send, User, MessageSquare, Tag, CheckCircle2, Headphones, ArrowRight } from 'lucide-react'
+import { Mail, MapPin, Send, User, MessageSquare, Tag, CheckCircle2, Headphones, ArrowRight, Phone, MessageCircle } from 'lucide-react'
 import Navbar from '../components/Navbar'
 import { Footer } from '../components/site/Footer'
 import { useNavigation } from '../context/NavigationContext'
@@ -144,10 +144,47 @@ export default function ContactPage() {
           {/* Side info */}
           <div className="flex flex-col gap-4">
             <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-              <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">Our office</p>
-              <div className="mt-3 flex items-start gap-3 text-sm text-slate-700">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">Direct Contact</p>
+              
+              <div className="mt-4 flex flex-col gap-3.5">
+                <a href={`mailto:${CONTACT.email}`} className="flex items-center gap-3 text-sm text-slate-700 hover:text-orange-600 transition-colors">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-orange-50 text-orange-600">
+                    <Mail className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-medium text-slate-400">Email Support</p>
+                    <p className="font-semibold text-slate-800">{CONTACT.email}</p>
+                  </div>
+                </a>
+
+                <a href={`tel:${CONTACT.phoneTel}`} className="flex items-center gap-3 text-sm text-slate-700 hover:text-orange-600 transition-colors">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-green-50 text-green-600">
+                    <Phone className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-medium text-slate-400">Phone Support</p>
+                    <p className="font-semibold text-slate-800">{CONTACT.phoneDisplay}</p>
+                  </div>
+                </a>
+
+                <a href={`https://wa.me/${CONTACT.whatsappNumber}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-sm text-slate-700 hover:text-green-600 transition-colors">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+                    <MessageCircle className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-medium text-slate-400">WhatsApp Chat</p>
+                    <p className="font-semibold text-slate-800">Quick reply on WhatsApp</p>
+                  </div>
+                </a>
+              </div>
+
+              <div className="my-5 border-t border-slate-100" />
+
+              <p className="text-[11px] font-bold uppercase tracking-widest text-slate-400">Our Office</p>
+              <div className="mt-2.5 flex items-start gap-3 text-xs leading-relaxed text-slate-600">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-orange-500" /> {CONTACT.address}
               </div>
+
               <div className="mt-5 flex gap-2.5">
                 {SOCIAL_LINKS.map(({ label: l, href, Icon }) => (
                   <a key={l} href={href} target="_blank" rel="noopener noreferrer" aria-label={l} title={l}

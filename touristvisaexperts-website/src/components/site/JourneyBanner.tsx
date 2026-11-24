@@ -271,7 +271,7 @@ export const JourneyBanner = () => {
             <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none z-0">
               <div className="absolute inset-0 world-map-bg opacity-50" aria-hidden />
               <img
-                src={plane} alt=""
+                src={plane} alt="Airplane in flight"
                 width={1280} height={640} loading="lazy"
                 className="absolute -right-28 -top-4 z-[1] hidden w-[60%] max-w-[700px] opacity-90 md:block"
               />

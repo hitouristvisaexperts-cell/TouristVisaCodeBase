@@ -17,12 +17,12 @@ export type Review = {
 
 // Shown until the admin publishes reviews from the portal (Admin → Testimonials)
 export const DEFAULT_REVIEWS: Review[] = [
-  { id: 'd1', country: 'USA',       quote: 'The team made my USA visa process so easy and stress-free. Got my visa in just a few days!', name: 'Rohit Mehta',   city: 'Mumbai, India',    avatar: avatarRohit,  rating: 5, stampDate: '15 MAY 2026', stampType: 'DEPARTED' },
-  { id: 'd2', country: 'UK',        quote: 'Excellent service and guidance at every step. Highly recommended!',                          name: 'Ananya Sharma', city: 'Delhi, India',     avatar: avatarAnanya, rating: 5, stampDate: '22 APR 2026', stampType: 'ARRIVED'  },
-  { id: 'd3', country: 'CANADA',    quote: 'Professional, reliable and very responsive. Got my Canada visa without any hassle.',         name: 'Arjun Nair',    city: 'Bangalore, India', avatar: avatarArjun,  rating: 5, stampDate: '10 JUN 2026', stampType: 'DEPARTED' },
-  { id: 'd4', country: 'AUSTRALIA', quote: 'Smooth and seamless experience. My Australia visa was approved faster than I expected!',     name: 'Priya Kapoor',  city: 'Chennai, India',   avatar: avatarAnanya, rating: 5, stampDate: '03 MAR 2026', stampType: 'ARRIVED'  },
-  { id: 'd5', country: 'SCHENGEN',  quote: 'They handled everything perfectly. Europe trip was a dream come true thanks to this team!',  name: 'Vikram Singh',  city: 'Pune, India',      avatar: avatarRohit,  rating: 5, stampDate: '18 JUL 2026', stampType: 'DEPARTED' },
-  { id: 'd6', country: 'DUBAI',     quote: 'Fast, efficient and very professional. Got my Dubai visa within 24 hours. Amazing service!', name: 'Sneha Reddy',   city: 'Hyderabad, India', avatar: avatarArjun,  rating: 5, stampDate: '29 AUG 2026', stampType: 'ARRIVED'  },
+  { id: 'd1', country: 'USA',       quote: 'The team made my USA visa process so easy and stress-free. Got my visa in just a few days!', name: 'Rohit Mehta',   city: 'Mumbai, India',    avatar: avatarRohit,  rating: 5, stampDate: '15 MAY 2024', stampType: 'DEPARTED' },
+  { id: 'd2', country: 'UK',        quote: 'Excellent service and guidance at every step. Highly recommended!',                          name: 'Ananya Sharma', city: 'Delhi, India',     avatar: avatarAnanya, rating: 5, stampDate: '22 APR 2024', stampType: 'ARRIVED'  },
+  { id: 'd3', country: 'CANADA',    quote: 'Professional, reliable and very responsive. Got my Canada visa without any hassle.',         name: 'Arjun Nair',    city: 'Bangalore, India', avatar: avatarArjun,  rating: 5, stampDate: '10 JUN 2024', stampType: 'DEPARTED' },
+  { id: 'd4', country: 'AUSTRALIA', quote: 'Smooth and seamless experience. My Australia visa was approved faster than I expected!',     name: 'Priya Kapoor',  city: 'Chennai, India',   avatar: avatarAnanya, rating: 5, stampDate: '03 MAR 2024', stampType: 'ARRIVED'  },
+  { id: 'd5', country: 'SCHENGEN',  quote: 'They handled everything perfectly. Europe trip was a dream come true thanks to this team!',  name: 'Vikram Singh',  city: 'Pune, India',      avatar: avatarRohit,  rating: 5, stampDate: '18 JUL 2024', stampType: 'DEPARTED' },
+  { id: 'd6', country: 'DUBAI',     quote: 'Fast, efficient and very professional. Got my Dubai visa within 24 hours. Amazing service!', name: 'Sneha Reddy',   city: 'Hyderabad, India', avatar: avatarArjun,  rating: 5, stampDate: '29 AUG 2024', stampType: 'ARRIVED'  },
 ]
 
 const API = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '')

@@ -47,7 +47,7 @@ function PageLoader() {
 }
 
 type VisaPage = { from: string; fromFlag: string; to: string; toFlag: string }
-type ActivePage = 'home' | 'about-us' | 'visa-assistance' | 'visa-details' | 'consultation' | 'flight-reservation' | 'checkout' | 'client-portal' | 'refund-guarantee' | 'rejected-visa' | 'documents' | 'article' | 'terms' | 'refund-policy' | 'privacy' | 'disclaimer' | 'consent' | 'data-retention' | 'contact-us' | 'resources'
+type ActivePage = 'home' | 'about-us' | 'visa-assistance' | 'visa-details' | 'consultation' | 'flight-reservation' | 'checkout' | 'client-portal' | 'refund-guarantee' | 'rejected-visa' | 'documents' | 'article' | 'terms' | 'refund-policy' | 'privacy' | 'disclaimer' | 'consent' | 'data-retention' | 'contact-us' | 'resources' | 'not-found'
 
 // URL path <-> page mapping
 const PATH_TO_PAGE: Record<string, ActivePage> = {
@@ -209,7 +209,14 @@ function App() {
   }, [location.pathname]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Derive active page from path
-  const activePage: ActivePage = visaUrlMatch ? 'visa-details' : checkoutUrlMatch ? 'checkout' : (PATH_TO_PAGE[location.pathname] ?? 'home')
+  const isKnownRoute = location.pathname === '/' || Boolean(PATH_TO_PAGE[location.pathname])
+  const activePage: ActivePage = visaUrlMatch
+    ? 'visa-details'
+    : checkoutUrlMatch
+    ? 'checkout'
+    : isKnownRoute
+    ? (PATH_TO_PAGE[location.pathname] ?? 'home')
+    : 'not-found'
 
   // Every page opens at the top, instantly, before it is painted (and the browser never restores an old position)
   useLayoutEffect(() => { if ('scrollRestoration' in window.history) window.history.scrollRestoration = 'manual' }, [])
@@ -328,6 +335,37 @@ function App() {
         <ArticlePage article={currentArticle} />
       ) : activePage === 'client-portal' ? (
         <ClientPortalPage />
+      ) : activePage === 'not-found' ? (
+        <div className="min-h-screen bg-[#F8F9FB] flex flex-col font-['Plus_Jakarta_Sans',sans-serif]">
+          <Navbar />
+          <div className="flex-1 flex flex-col items-center justify-center px-4 py-28 text-center max-w-xl mx-auto">
+            <div className="w-16 h-16 rounded-2xl bg-orange-100 border border-orange-200 flex items-center justify-center text-3xl mb-6 shadow-sm">
+              🧭
+            </div>
+            <p className="text-xs font-bold uppercase tracking-widest text-orange-500 mb-2">Error 404</p>
+            <h1 className="text-3xl sm:text-4xl font-black text-slate-900 mb-3">Page Not Found</h1>
+            <p className="text-slate-600 text-[15px] leading-relaxed mb-8">
+              The page you're looking for doesn't exist, has been moved, or the link is incorrect. Head back to explore our visa services.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => go('/')}
+                className="inline-flex items-center gap-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm px-6 py-3.5 shadow-lg shadow-orange-500/25 transition-all"
+              >
+                Go to Homepage →
+              </button>
+              <button
+                type="button"
+                onClick={() => go('/contact')}
+                className="inline-flex items-center gap-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-sm px-6 py-3.5 shadow-sm transition-all"
+              >
+                Contact Support
+              </button>
+            </div>
+          </div>
+          <Footer />
+        </div>
       ) : (
         <>
           <Navbar />

@@ -290,7 +290,7 @@ function BookingForm({ to, toFlag: _toFlag, initFrom, initFromFlag }: FormProps)
           onClick={handleContinue}
           className="w-full py-3 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white font-black text-sm rounded-xl shadow-lg shadow-orange-500/25 hover:shadow-xl hover:shadow-orange-500/30 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-2"
         >
-          Get Your Visa Or Full Refund
+          Expert Support, Start to Finish
           <Plane className="h-4 w-4" />
         </button>
 
@@ -539,8 +539,8 @@ const WHY_ITEMS = [
     bg: '#F0FDF4',
     border: '#BBF7D0',
     Icon: BadgeCheck,
-    title: 'High Approval Rate',
-    desc: 'Our proven track record of successful visa approvals saves you time and effort. We streamline the process so you focus on your travel plans.',
+    title: 'Every Document Checked',
+    desc: 'Every form, photo, and supporting document is thoroughly reviewed before submission to prevent common embassy refusal triggers.',
   },
   {
     color: '#3B82F6',
@@ -925,8 +925,8 @@ export default function VisaDetails({ from, fromFlag, to, toFlag }: Props) {
                       {[1,2,3,4,5].map(s => <Star key={s} className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />)}
                       <span className="text-slate-500 text-xs ml-1.5">Rated by our customers</span>
                     </div>
-                    <span className="flex items-center gap-1.5 text-sm text-slate-700"><BadgeCheck className="h-4 w-4 text-green-500" /><span className="font-semibold">High Approval Rate</span></span>
-                                      </div>
+                    <span className="flex items-center gap-1.5 text-sm text-slate-700"><BadgeCheck className="h-4 w-4 text-green-500" /><span className="font-semibold">Every Document Checked</span></span>
+                  </div>
                 </div>
               </ScrollReveal>
 
@@ -935,8 +935,8 @@ export default function VisaDetails({ from, fromFlag, to, toFlag }: Props) {
                 {/* 4-across only where the column is wide enough (tablet with no side card, or wide desktop) */}
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-2 2xl:grid-cols-4 gap-2">
                   {[
-                    { Icon: Clock,    label: 'Processing',  value: `Min. ${visaInfo.processing}`, color: '#F97316', tip: 'Processing starts after your appointment and may vary based on the embassy.' },
-                    { Icon: Calendar, label: 'Validity',    value: `Upto ${visaInfo.validity}`, color: '#3B82F6', tip: 'The embassy decides the final visa validity for each application.' },
+                    { Icon: Clock,    label: 'Processing',  value: `Embassy Set (~${visaInfo.processing})`, color: '#F97316', tip: 'Processing times are set by the embassy and vary. We keep your file moving and update you at every step.' },
+                    { Icon: Calendar, label: 'Validity',    value: `Up to ${visaInfo.validity}`, color: '#3B82F6', tip: 'The embassy decides the final visa validity for each application.' },
                     { Icon: Globe,    label: 'Entry Type',  value: visaInfo.entries,  color: '#22C55E', tip: 'The final entry type is decided solely by the embassy.' },
                     { Icon: Users,    label: 'Expert Guidance', value: 'Every Step',  color: '#8B5CF6', tip: 'Our experts guide you through every step of your visa application.' },
                   ].map(({ Icon, label, value, color, tip }) => (

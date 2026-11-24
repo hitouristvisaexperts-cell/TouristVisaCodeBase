@@ -29,7 +29,7 @@ const FAQS = [
   { q: 'Will you guarantee visa approval?', a: 'No one can guarantee a visa — the decision always rests with the embassy. We give you the best possible chance by addressing every concern from your refusal.' },
   { q: 'What documents should I share?', a: 'Your refusal letter, the documents from your previous application, current bank statements, proof of employment or business, and anything else your specialist asks for.' },
   { q: "What if I don't have the refusal letter?", a: 'We can still help. We review your original application details and rebuild the file based on the most likely reasons for refusal for your destination.' },
-  { q: 'How does the cashback work?', a: 'If your new visa is approved and you submit a video testimonial, we pay the cashback per person on the application. No cashback applies if the visa is not approved. Terms & conditions apply.' },
+  { q: 'How does the cashback work?', a: 'When your case concludes and you share an honest video review of your journey with our team, we credit the cashback directly to your account. Terms & conditions apply.' },
 ]
 const TABS = [
   { id: 'rv-process', label: 'Our Process' },

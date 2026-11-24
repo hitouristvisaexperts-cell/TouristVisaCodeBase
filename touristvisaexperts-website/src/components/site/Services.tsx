@@ -32,17 +32,17 @@ const SERVICES = [
       { icon: FileText,     text: 'Document Review & Checklist' },
       { icon: Shield,       text: 'Embassy Application Handling' },
       { icon: Clock,        text: 'Real-Time Application Tracking' },
-      { icon: BadgeCheck,   text: 'High Approval Rate' },
+      { icon: BadgeCheck,   text: 'Thorough Document Check' },
     ],
-    stats: [{ val: 'High', label: 'Approval Rate' }, { val: '1-on-1', label: 'Support' }, { val: 'Experts', label: 'Assigned' }],
+    stats: [{ val: '100%', label: 'Document Check' }, { val: '1-on-1', label: 'Support' }, { val: 'Experts', label: 'Assigned' }],
     cta: 'Get Visa Help',
   },
   {
     id: 'flight',
     n: '02',
     title: 'Flight Reservation',
-    tagline: '100% embassy-verifiable dummy tickets.',
-    desc: 'Get a verified dummy flight booking for your visa application — accepted at all major embassies. We prioritize results while keeping you informed throughout the journey.',
+    tagline: 'Verifiable flight reservations for visa applications.',
+    desc: 'Get a verified flight reservation for your visa application — tailored for embassy submission without purchasing expensive upfront tickets.',
     color: '#F97316',
     colorDark: '#c2410c',
     bgFrom: '#1f0e00',
@@ -51,12 +51,12 @@ const SERVICES = [
     badge: 'Fast Delivery',
     badgeIcon: Zap,
     features: [
-      { icon: Plane,        text: 'Embassy-Verified Booking' },
+      { icon: Plane,        text: 'Embassy-Ready Booking' },
       { icon: Clock,        text: 'Quick Turnaround' },
       { icon: CalendarCheck,text: 'All Major Airlines' },
       { icon: CheckCircle2, text: 'No Payment Upfront' },
     ],
-    stats: [{ val: 'Fast', label: 'Delivery' }, { val: '100%', label: 'Verified' }, { val: '500+', label: 'Airlines' }],
+    stats: [{ val: 'Fast', label: 'Delivery' }, { val: '100%', label: 'Verifiable' }, { val: '500+', label: 'Airlines' }],
     cta: 'Book Ticket Now',
   },
   {
@@ -151,7 +151,7 @@ function ServiceCard({ s, index }: { s: typeof SERVICES[0]; index: number }) {
 
       {/* Destination image — subtle blurred overlay */}
       <div className="absolute inset-0 z-[1]">
-        <img src={s.image} alt="" className="w-full h-full object-cover opacity-[0.12] scale-110" />
+        <img src={s.image} alt={`${s.title} background`} className="w-full h-full object-cover opacity-[0.12] scale-110" />
         <div className="absolute inset-0" style={{ background: `linear-gradient(180deg, transparent 0%, ${s.bgTo}ee 65%)` }} />
       </div>
 

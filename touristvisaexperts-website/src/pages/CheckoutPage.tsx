@@ -925,7 +925,7 @@ export default function CheckoutPage({ visaCountry, fromCountry, initialTravelle
                   <button type="button" onClick={() => setShowCashbackModal(true)}
                     className="flex items-center gap-2 rounded-lg bg-green-50 px-3 py-2 text-left text-[12.5px] font-bold text-green-900 hover:bg-green-100">
                     <Gift className="h-4 w-4 flex-shrink-0 text-green-600" />
-                    {localPrice(cbTotal)} cashback after approval + video testimonial
+                    {localPrice(cbTotal)} cashback upon sharing your video experience review
                     <span className="ml-auto text-[11px] font-semibold text-green-700">Details</span>
                   </button>
                   <div className="flex items-center justify-between rounded-lg border border-green-100 px-3 py-2 text-[13px]">

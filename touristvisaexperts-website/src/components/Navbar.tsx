@@ -16,8 +16,8 @@ function PlaneIcon() {
 const NAV_LINKS = [
   { label: 'Home',       target: 'home',      hasDropdown: false },
   { label: 'About Us',   target: 'about-us',  hasDropdown: false },
-  { label: 'Services',   target: 'services',  hasDropdown: true  },
-  { label: 'Resources',  target: 'resources', hasDropdown: true  },
+  { label: 'Services',   target: 'services',  hasDropdown: false },
+  { label: 'Resources',  target: 'resources', hasDropdown: false },
   { label: 'Contact Us', target: 'contact',   hasDropdown: false },
 ]
 
@@ -151,7 +151,7 @@ export default function Navbar() {
             onClick={() => { openRejectedVisa(); setMenuOpen(false) }}
             className={styles.rejectedBtnMobile}
           >
-            Visa Rejected? We Fix It
+            Visa Rejected? Rebuild It Right
           </button>
           {/* Mobile Flight CTA */}
           <button

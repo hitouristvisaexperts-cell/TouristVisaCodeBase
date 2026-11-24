@@ -289,16 +289,16 @@ const FAQS = [
   },
 ]
 
-/* ─── Live approval notifications ─────────────────── */
+/* ─── Case Milestone Showcase ─────────────────────────── */
 const APPROVALS = [
-  { flag: '🇫🇷', country: 'France (Schengen)', type: 'Visa Approved',         time: 'just now',  color: '#22C55E' },
-  { flag: '🇬🇧', country: 'UK Tourist Visa',   type: 'Documents Verified',    time: '3m ago',    color: '#3B82F6' },
-  { flag: '🇯🇵', country: 'Japan Visa',         type: 'Application Submitted', time: '7m ago',    color: '#F97316' },
-  { flag: '🇦🇪', country: 'Dubai Visit Visa',   type: 'Visa Approved',         time: '11m ago',   color: '#22C55E' },
-  { flag: '🇨🇦', country: 'Canada Visa',        type: 'Expert Assigned',       time: '14m ago',   color: '#8B5CF6' },
-  { flag: '🇸🇬', country: 'Singapore EP',       type: 'Visa Approved',         time: '18m ago',   color: '#22C55E' },
-  { flag: '🇩🇪', country: 'Germany (Schengen)', type: 'Checklist Sent',        time: '22m ago',   color: '#14B8A6' },
-  { flag: '🇺🇸', country: 'USA B1/B2 Visa',     type: 'Documents Verified',    time: '29m ago',   color: '#3B82F6' },
+  { flag: '🇫🇷', country: 'France (Schengen)', type: 'Visa Approved',         time: 'Step 4/4', color: '#22C55E' },
+  { flag: '🇬🇧', country: 'UK Tourist Visa',   type: 'Documents Verified',    time: 'Step 2/4', color: '#3B82F6' },
+  { flag: '🇯🇵', country: 'Japan Visa',         type: 'Application Submitted', time: 'Step 3/4', color: '#F97316' },
+  { flag: '🇦🇪', country: 'Dubai Visit Visa',   type: 'Visa Approved',         time: 'Step 4/4', color: '#22C55E' },
+  { flag: '🇨🇦', country: 'Canada Visa',        type: 'Expert Assigned',       time: 'Step 1/4', color: '#8B5CF6' },
+  { flag: '🇸🇬', country: 'Singapore Visa',     type: 'Visa Approved',         time: 'Step 4/4', color: '#22C55E' },
+  { flag: '🇩🇪', country: 'Germany (Schengen)', type: 'Checklist Sent',        time: 'Step 1/4', color: '#14B8A6' },
+  { flag: '🇺🇸', country: 'USA B1/B2 Visa',     type: 'Documents Verified',    time: 'Step 2/4', color: '#3B82F6' },
 ]
 
 /* ─── Animated step connector ───────────────────────── */
@@ -647,7 +647,7 @@ export default function VisaAssistancePage() {
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
                       <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500" />
                     </span>
-                    <span className="text-white/50 text-xs font-semibold uppercase tracking-wider">Live Updates</span>
+                    <span className="text-white/70 text-xs font-semibold uppercase tracking-wider">Milestone Tracking</span>
                   </div>
                   <div className="bg-white/5 border border-white/10 rounded-2xl p-3 backdrop-blur-sm h-[216px] overflow-hidden relative">
                     {/* fade-out at bottom so items disappear cleanly */}

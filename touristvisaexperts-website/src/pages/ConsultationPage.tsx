@@ -38,7 +38,7 @@ const TRUST = [
   { icon: Shield,     label: 'Data Privacy',      sub: 'Never shared with 3rd parties' },
   { icon: Zap,        label: 'Quick Response',    sub: 'We reply promptly' },
   { icon: Headphones, label: 'Expert Assigned',   sub: 'Dedicated visa specialist' },
-  { icon: Award,      label: 'Certified Experts', sub: 'Licensed visa consultants' },
+  { icon: Award,      label: 'Experienced Team',  sub: 'Dedicated visa specialists' },
 ]
 
 type Field = {

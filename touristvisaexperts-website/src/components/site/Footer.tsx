@@ -20,8 +20,8 @@ const cols = [
     items: [
       { label: "Tourist Visa", target: "visa-assistance" },
       { label: "Flight Reservation", target: "flight-reservation" },
-      { label: "100% Refund Guarantee", target: "refund-guarantee" },
-      { label: "Visa Rejected? We Fix It", target: "rejected-visa" },
+      { label: "Refund & Cancellation Policy", target: "refund-policy" },
+      { label: "Visa Rejected? Rebuild It Right", target: "rejected-visa" },
     ],
   },
   {

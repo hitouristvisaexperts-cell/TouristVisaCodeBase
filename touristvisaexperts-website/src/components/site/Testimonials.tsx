@@ -155,7 +155,7 @@ export const Testimonials = () => {
                 <p className="text-[7px] font-bold tracking-wider">IMMIGRATION</p>
                 <Plane className="w-3 h-3 my-0.5" />
                 <p className="text-[9px] font-bold">ARRIVED</p>
-                <p className="text-[9px] font-bold">05 APR 2026</p>
+                <p className="text-[9px] font-bold">05 APR 2024</p>
                 <p className="text-[7px] font-bold tracking-wider">U.K.</p>
               </div>
 
@@ -163,7 +163,7 @@ export const Testimonials = () => {
               <div className="relative border-2 border-passport-gold/70 text-passport-gold rounded-sm px-3 py-2 rotate-[-10deg] bg-white/5 self-start mt-4">
                 <p className="text-[9px] font-bold tracking-wider text-center">ENTRY</p>
                 <p className="text-[11px] font-bold text-center">CANADA</p>
-                <p className="text-[9px] font-bold tracking-wider text-center">10 JUN 2026</p>
+                <p className="text-[9px] font-bold tracking-wider text-center">10 JUN 2024</p>
                 <p className="text-[8px] font-bold tracking-wider text-center opacity-70">VISITOR</p>
               </div>
 
@@ -171,21 +171,21 @@ export const Testimonials = () => {
               <div className="relative border-2 border-passport-orange/70 text-passport-orange rounded-full w-20 h-20 flex flex-col items-center justify-center rotate-[5deg] bg-white/5 mt-8">
                 <p className="text-[7px] font-bold tracking-wider">✦ SCHENGEN ✦</p>
                 <p className="text-[8px] font-bold mt-0.5">APPROVED</p>
-                <p className="text-[7px] font-bold">18 JUL 2026</p>
+                <p className="text-[7px] font-bold">18 JUL 2024</p>
               </div>
 
               {/* Stamp 5 — rectangular DUBAI DEPARTED */}
               <div className="relative border-2 border-stamp-red/60 text-stamp-red rounded px-2 py-1.5 rotate-[14deg] bg-white/5 self-end mb-2">
                 <p className="text-[8px] font-bold tracking-wider text-center">✈ DUBAI ✈</p>
                 <p className="text-[10px] font-bold text-center">DEPARTED</p>
-                <p className="text-[8px] font-bold tracking-wider text-center">29 AUG 2026</p>
+                <p className="text-[8px] font-bold tracking-wider text-center">29 AUG 2024</p>
               </div>
 
               {/* Stamp 6 — oval JAPAN ENTRY */}
               <div className="relative border-2 border-stamp-blue/50 text-stamp-blue/80 rounded-full w-[86px] h-[86px] flex flex-col items-center justify-center rotate-[-12deg] bg-white/5 mt-2">
                 <p className="text-[7px] font-bold tracking-widest">JAPAN</p>
                 <p className="text-[8px] font-bold">ENTRY</p>
-                <p className="text-[7px] font-bold mt-0.5">03 SEP 2026</p>
+                <p className="text-[7px] font-bold mt-0.5">03 SEP 2024</p>
                 <p className="text-[6px] font-bold tracking-wider opacity-70">IMMIGRATION</p>
               </div>
 
@@ -193,56 +193,56 @@ export const Testimonials = () => {
               <div className="relative border-2 border-passport-gold/60 text-passport-gold rounded px-3 py-1.5 rotate-[-7deg] bg-white/5 self-start mt-6">
                 <p className="text-[8px] font-bold tracking-wider text-center">AUSTRALIA</p>
                 <p className="text-[10px] font-bold text-center">VISITOR VISA</p>
-                <p className="text-[8px] font-bold tracking-wider text-center opacity-80">12 OCT 2026</p>
+                <p className="text-[8px] font-bold tracking-wider text-center opacity-80">12 OCT 2024</p>
               </div>
 
               {/* Stamp 8 — small square TRANSIT */}
               <div className="relative border-2 border-stamp-blue/60 text-stamp-blue rounded-sm px-2 py-1.5 rotate-[18deg] bg-white/5 self-end mb-4">
                 <p className="text-[8px] font-bold tracking-wider text-center">TRANSIT</p>
                 <p className="text-[9px] font-bold text-center">SINGAPORE</p>
-                <p className="text-[7px] font-bold tracking-wider text-center opacity-70">07 NOV 2026</p>
+                <p className="text-[7px] font-bold tracking-wider text-center opacity-70">07 NOV 2024</p>
               </div>
 
               {/* Stamp 9 — circular FRANCE APPROVED */}
               <div className="relative border-2 border-stamp-red/55 text-stamp-red/80 rounded-full w-[76px] h-[76px] flex flex-col items-center justify-center rotate-[9deg] bg-white/5 mt-4">
                 <p className="text-[6px] font-bold tracking-wider">✦ FRANCE ✦</p>
                 <p className="text-[8px] font-bold mt-0.5">APPROVED</p>
-                <p className="text-[7px] font-bold">22 DEC 2026</p>
+                <p className="text-[7px] font-bold">22 DEC 2024</p>
               </div>
 
               {/* Stamp 10 — rectangular NEW ZEALAND ENTRY */}
               <div className="relative border-2 border-passport-gold/65 text-passport-gold rounded px-3 py-1.5 rotate-[-15deg] bg-white/5 self-start mt-3">
                 <p className="text-[8px] font-bold tracking-wider text-center">NEW ZEALAND</p>
                 <p className="text-[10px] font-bold text-center">ENTRY PERMIT</p>
-                <p className="text-[8px] font-bold tracking-wider text-center opacity-80">14 JAN 2027</p>
+                <p className="text-[8px] font-bold tracking-wider text-center opacity-80">14 JAN 2025</p>
               </div>
 
               {/* Stamp 11 — oval GERMANY IMMIGRATION */}
               <div className="relative border-2 border-stamp-blue/60 text-stamp-blue rounded-full w-[90px] h-[70px] flex flex-col items-center justify-center rotate-[11deg] bg-white/5 mt-6">
                 <p className="text-[7px] font-bold tracking-wider">GERMANY</p>
                 <p className="text-[8px] font-bold">EINREISE</p>
-                <p className="text-[7px] font-bold mt-0.5">08 FEB 2027</p>
+                <p className="text-[7px] font-bold mt-0.5">08 FEB 2025</p>
               </div>
 
               {/* Stamp 12 — square THAILAND VISA */}
               <div className="relative border-2 border-passport-orange/65 text-passport-orange rounded-sm px-2 py-2 rotate-[-8deg] bg-white/5 self-end mb-3">
                 <p className="text-[8px] font-bold tracking-wider text-center">✈ THAILAND ✈</p>
                 <p className="text-[9px] font-bold text-center">TOURIST VISA</p>
-                <p className="text-[7px] font-bold tracking-wider text-center opacity-80">02 MAR 2027</p>
+                <p className="text-[7px] font-bold tracking-wider text-center opacity-80">02 MAR 2025</p>
               </div>
 
               {/* Stamp 13 — circular ITALY APPROVED */}
               <div className="relative border-2 border-stamp-red/60 text-stamp-red rounded-full w-[72px] h-[72px] flex flex-col items-center justify-center rotate-[-14deg] bg-white/5 mt-2">
                 <p className="text-[6px] font-bold tracking-wider">✦ ITALY ✦</p>
                 <p className="text-[8px] font-bold mt-0.5">VISTO</p>
-                <p className="text-[7px] font-bold">19 APR 2027</p>
+                <p className="text-[7px] font-bold">19 APR 2025</p>
               </div>
 
               {/* Stamp 14 — rectangular SPAIN DEPARTED */}
               <div className="relative border-2 border-stamp-blue/55 text-stamp-blue rounded px-2 py-1.5 rotate-[20deg] bg-white/5 self-start mt-8">
                 <p className="text-[8px] font-bold tracking-wider text-center">— SPAIN —</p>
                 <p className="text-[10px] font-bold text-center">SALIDA</p>
-                <p className="text-[8px] font-bold tracking-wider text-center opacity-80">30 MAY 2027</p>
+                <p className="text-[8px] font-bold tracking-wider text-center opacity-80">30 MAY 2025</p>
               </div>
             </div>
           </div>

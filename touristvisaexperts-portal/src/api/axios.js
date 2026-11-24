@@ -13,11 +13,13 @@ api.interceptors.request.use((config) => {
   return config
 })
 
-// Handle 401 globally — redirect to login
+// Handle 401 globally — redirect to login for expired sessions, but allow login errors through
 api.interceptors.response.use(
   (res) => res,
   (err) => {
-    if (err.response?.status === 401) {
+    const isLoginReq = err.config?.url?.includes('/auth/login')
+    const isOnLoginPage = typeof window !== 'undefined' && window.location.pathname.includes('/login')
+    if (err.response?.status === 401 && !isLoginReq && !isOnLoginPage) {
       localStorage.removeItem('fv_token')
       localStorage.removeItem('fv_user')
       window.location.href = '/login'

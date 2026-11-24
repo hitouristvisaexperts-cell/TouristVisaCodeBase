@@ -56,7 +56,7 @@ export default function SearchDialog({ open, onClose }: { open: boolean; onClose
       { id: 's-visa', group: 'Services', title: 'Visa Assistance', subtitle: 'A dedicated expert handles your application', keywords: 'apply help tourist package', Icon: FileCheck2, run: go(nav.openVisaAssistance) },
       { id: 's-flight', group: 'Services', title: 'Flight Reservation — ₹999', subtitle: 'Embassy-ready dummy flight ticket', keywords: 'dummy ticket booking itinerary air', Icon: Plane, run: go(nav.openFlightReservation) },
       { id: 's-consult', group: 'Services', title: 'Book a Consultation', subtitle: '1-on-1 session with a visa expert', keywords: 'talk expert call meeting advice contact', Icon: Headphones, run: go(nav.openConsultation) },
-      { id: 's-rejected', group: 'Services', title: 'Visa Rejected? We Fix It', subtitle: 'Re-application with a specialist', keywords: 'refused refusal denied reapply specialist', Icon: ShieldAlert, run: go(nav.openRejectedVisa) },
+      { id: 's-rejected', group: 'Services', title: 'Visa Rejected? Rebuild It Right', subtitle: 'Re-application with a specialist', keywords: 'refused refusal denied reapply specialist', Icon: ShieldAlert, run: go(nav.openRejectedVisa) },
       { id: 's-guarantee', group: 'Services', title: '100% Refund Guarantee', subtitle: 'How the refund guarantee works', keywords: 'money back refund guarantee', Icon: ShieldCheck, run: go(() => navigate('/refund-guarantee')) },
       { id: 's-docs', group: 'Services', title: 'Document Checklist', subtitle: 'What documents you need', keywords: 'documents checklist papers bank statement passport', Icon: FileText, run: go(() => navigate('/documents')) },
     ]

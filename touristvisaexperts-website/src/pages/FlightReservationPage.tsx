@@ -1145,7 +1145,7 @@ function Step3({ route, passengers, onBack }: { route: RouteData; passengers: Pa
           { Icon: Mail,         label: 'Email',      value: passengers[0]?.email ?? '—' },
           { Icon: PlaneTakeoff, label: 'Route',      value: route.from && route.to ? `${getCity(route.from)} → ${getCity(route.to)}` : '—' },
           { Icon: CalendarDays, label: 'Departure',  value: fmtDate(route.departure) },
-          { Icon: Users,        label: 'No of Travellers', value: passengers.map(p => `${p.firstName} ${p.lastName}`).join(', ') || '—' },
+          { Icon: Users,        label: 'Travellers', value: `${passengers.length} Passenger${passengers.length > 1 ? 's' : ''}${passengers.some(p => p.firstName) ? ` · ${passengers.map(p => `${p.firstName} ${p.lastName}`.trim()).filter(Boolean).join(', ')}` : ''}` },
         ].map(({ Icon, label, value }) => (
           <div
             key={label}
@@ -1359,21 +1359,21 @@ export default function FlightReservationPage() {
 
   const HOW_IT_WORKS = [
     { title: 'Fill Your Details',       desc: 'Enter your flight route, travel dates, and passenger information in under 2 minutes.',    icon: FileCheck,    color: '#F97316' },
-    { title: 'We Create Your Ticket',   desc: 'Our team generates a 100% embassy-verified dummy booking and sends it to you.',          icon: Plane,        color: '#3B82F6' },
+    { title: 'We Create Your Ticket',   desc: 'Our team generates a verifiable flight reservation for your visa application and sends it to you.', icon: Plane, color: '#3B82F6' },
     { title: 'Receive & Apply',         desc: 'Get your ticket by email and attach it to your visa application. Done!',                  icon: CheckCircle2, color: '#22C55E' },
   ]
 
   const FAQS = [
-    { q: 'Is this a real flight booking?',     a: 'No — it\'s a dummy/onward ticket specifically created for visa applications. It is 100% embassy-verifiable but does not hold a real seat.' },
+    { q: 'Is this a real flight booking?',     a: 'No — it\'s a verifiable flight reservation specifically created for visa application purposes. It provides authentic reservation details for visa processing without requiring an expensive confirmed ticket upfront.' },
     { q: 'Will the embassy accept this?',      a: 'Yes. Our tickets are accepted by all major embassies including Schengen, UAE, UK, Singapore, USA, and more.' },
     { q: 'How will I receive my ticket?',      a: 'Your ticket is delivered straight to your email inbox once it\'s ready. Our team prepares it as quickly as possible.' },
     { q: 'What if my visa is rejected?',       a: 'Our ₹999 service fee is non-refundable as we create and deliver the ticket regardless of visa outcome. We do offer free revisions on ticket details.' },
   ]
 
   const TESTIMONIALS = [
-    { name: 'Priya S.', dest: 'Schengen Visa', text: 'Got my dummy ticket quickly! Embassy approved without any issue. Highly recommended service.', stars: 5 },
-    { name: 'Rahul M.', dest: 'UAE Visa',      text: 'Super fast and professional. The ticket looked authentic and was accepted by the embassy immediately.', stars: 5 },
-    { name: 'Anjali K.', dest: 'UK Visa',      text: 'Third time using this service. Always reliable, always fast. Worth every rupee!', stars: 5 },
+    { name: 'Priya S.', dest: 'Schengen Visa', text: 'Got my flight reservation in my inbox within minutes. Accurate route details and very responsive support.', stars: 5 },
+    { name: 'Rahul M.', dest: 'UAE Visa',      text: 'Super fast delivery and clean layout. Customer service answered all my questions right away.', stars: 5 },
+    { name: 'Anjali K.', dest: 'UK Visa',      text: 'Third time using this service for my visa files. Always reliable, always fast. Worth every rupee!', stars: 5 },
   ]
 
   return (
@@ -1478,7 +1478,7 @@ export default function FlightReservationPage() {
                 transition={{ delay: 0.22, duration: 0.6 }}
                 className="text-gray-500 text-[15.5px] leading-relaxed max-w-md mb-8"
               >
-                100% embassy-verifiable dummy tickets for your visa application,
+                Verifiable flight reservations for your visa application,
                 delivered straight to your inbox.
               </motion.p>
 

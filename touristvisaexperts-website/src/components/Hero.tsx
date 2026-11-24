@@ -157,7 +157,8 @@ function CountrySelect({
                 <img
                   src={flagSrc(value.code)}
                   width="22" height="16"
-                  alt={value.label}
+                  alt=""
+                  aria-hidden="true"
                   className={styles.flagImg}
                   onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
                 />
@@ -268,7 +269,7 @@ export default function Hero({ onCheck }: HeroProps) {
           width={1535}
           height={1024}
           fetchPriority="high"
-          alt=""
+          alt="Tourist visa destination landscape"
           className={styles.bgImg}
         />
       </div>
@@ -284,12 +285,14 @@ export default function Hero({ onCheck }: HeroProps) {
               #1 Visa Assistance Company
             </div>
 
-            <h1 className={styles.heading}>Making Your Travel</h1>
-            <h2 className={styles.script}>Dreams Come True</h2>
+            <h1 className={styles.heading}>
+              Making Your Travel
+              <span className={styles.script} style={{ display: 'block' }}>Dreams Come True</span>
+            </h1>
 
             <p className={styles.desc}>
-              Expert visa assistance with a proven track record of high
-              approval rates.
+              Expert visa assistance with meticulous document preparation and
+              end-to-end guidance.
             </p>
 
             <div className={styles.formCard}>
@@ -371,13 +374,13 @@ export default function Hero({ onCheck }: HeroProps) {
                 <div className={styles.trustDivider} />
                 <div className={styles.trustItem}>
                   <div className={styles.avatarGroup}>
-                    <img src="https://i.pravatar.cc/32?img=1" className={styles.avatar} alt="" />
-                    <img src="https://i.pravatar.cc/32?img=2" className={styles.avatar} alt="" />
-                    <img src="https://i.pravatar.cc/32?img=3" className={styles.avatar} alt="" />
-                    <img src="https://i.pravatar.cc/32?img=4" className={styles.avatar} alt="" />
+                    <img src="https://i.pravatar.cc/32?img=1" className={styles.avatar} alt="Traveler avatar" />
+                    <img src="https://i.pravatar.cc/32?img=2" className={styles.avatar} alt="Traveler avatar" />
+                    <img src="https://i.pravatar.cc/32?img=3" className={styles.avatar} alt="Traveler avatar" />
+                    <img src="https://i.pravatar.cc/32?img=4" className={styles.avatar} alt="Traveler avatar" />
                   </div>
                   <div>
-                    <div className={styles.trustTitle}>Trusted by 10,000+ Travelers</div>
+                    <div className={styles.trustTitle}>Trusted by 2,500+ Travelers</div>
                     <div className={styles.trustSub}>Join thousands of happy travelers.</div>
                   </div>
                 </div>
