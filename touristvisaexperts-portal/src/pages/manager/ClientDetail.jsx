@@ -895,9 +895,6 @@ export default function TeamClientDetail() {
 
             {ocrResult && (
               <div style={{ padding:'16px 24px', borderTop:'1px solid #f1f5f9', display:'flex', justifyContent:'flex-end', gap:10 }}>
-                <button onClick={handleDownloadTxt} className="btn-secondary">
-                  ↓ Download .txt
-                </button>
                 <button onClick={handleSaveExtracted} className="btn-primary" disabled={ocrSaving} style={{ background:'#10b981' }}>
                   {ocrSaving ? 'Saving...' : '✓ Save to Document'}
                 </button>

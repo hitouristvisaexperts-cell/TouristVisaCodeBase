@@ -23,6 +23,8 @@ const ACTIVITY_ROLE_CFG = {
   system: { bg:'#f8fafc', color:'#64748b', border:'#e2e8f0' },
 }
 
+const IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+
 export default function AdminClientDetail() {
   const { id } = useParams()
   const [client, setClient] = useState(null)
@@ -32,7 +34,8 @@ export default function AdminClientDetail() {
   const [activityLoading, setActivityLoading] = useState(false)
   const [docs, setDocs] = useState([])
   const [docsLoading, setDocsLoading] = useState(false)
-  const [downloadingDoc, setDownloadingDoc] = useState(null)
+  const [viewDoc, setViewDoc] = useState(null)
+  const [viewDocLoading, setViewDocLoading] = useState(null)
   const [editModal, setEditModal] = useState(false)
   const [assignModal, setAssignModal] = useState(false)
   const [assignTo, setAssignTo] = useState('')
@@ -112,22 +115,17 @@ export default function AdminClientDetail() {
     finally { setResolvingFlag(false) }
   }
 
-  const handleDownloadDoc = async (doc) => {
-    setDownloadingDoc(doc._id)
+  const handleViewDoc = async (doc) => {
+    setViewDocLoading(doc._id)
     try {
       const res = await downloadClientDocument(id, doc._id)
-      const url = window.URL.createObjectURL(new Blob([res.data], { type: doc.mimeType || 'application/octet-stream' }))
-      const link = document.createElement('a')
-      link.href = url
-      link.setAttribute('download', doc.originalName || 'document')
-      document.body.appendChild(link)
-      link.click()
-      link.remove()
-      window.URL.revokeObjectURL(url)
+      const blobUrl = URL.createObjectURL(new Blob([res.data], { type: doc.mimeType || 'application/pdf' }))
+      const isImage = IMAGE_TYPES.includes(doc.mimeType)
+      setViewDoc({ doc, blobUrl, isImage })
     } catch {
-      alert('Failed to download document')
+      setViewDoc({ doc, blobUrl: null, isImage: false, error: 'File not found on server or unable to preview.' })
     } finally {
-      setDownloadingDoc(null)
+      setViewDocLoading(null)
     }
   }
 
@@ -450,24 +448,15 @@ export default function AdminClientDetail() {
                       </div>
                     </div>
                     <button
-                      onClick={() => handleDownloadDoc(doc)}
-                      disabled={downloadingDoc === doc._id}
+                      onClick={() => handleViewDoc(doc)}
+                      disabled={viewDocLoading === doc._id}
                       className="btn-secondary"
                       style={{
                         fontSize:12.5, fontWeight:700, display:'flex', alignItems:'center', gap:6, padding:'7px 14px', borderRadius:9,
                         background:'#f8fafc', border:'1px solid #cbd5e1', cursor:'pointer'
                       }}
                     >
-                      {downloadingDoc === doc._id ? (
-                        'Downloading…'
-                      ) : (
-                        <>
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-                          </svg>
-                          Download
-                        </>
-                      )}
+                      {viewDocLoading === doc._id ? 'Loading…' : '👁 View'}
                     </button>
                   </div>
                 )
@@ -660,6 +649,79 @@ export default function AdminClientDetail() {
           </div>
         </form>
       </Modal>
+
+      {/* Protected Document Viewer - View Only, No Download */}
+      {viewDoc && (
+        <div
+          style={{ position:'fixed', inset:0, zIndex:1000, background:'rgba(0,0,0,0.85)', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center' }}
+          onClick={() => { if (viewDoc.blobUrl) URL.revokeObjectURL(viewDoc.blobUrl); setViewDoc(null) }}
+        >
+          <div style={{ position:'relative', maxWidth:'90vw', maxHeight:'85vh' }} onClick={e => e.stopPropagation()}>
+            {/* Header */}
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 16px', background:'#1e293b', borderRadius: viewDoc.error ? 12 : '12px 12px 0 0' }}>
+              <span style={{ color:'#e2e8f0', fontSize:13, fontWeight:600 }}>{viewDoc.doc.originalName}</span>
+              <div style={{ display:'flex', gap:8, alignItems:'center' }}>
+                <span style={{ fontSize:11, color: '#94a3b8', background:'#334155', padding:'3px 8px', borderRadius:6 }}>🔒 View Only</span>
+                <button onClick={() => { if (viewDoc.blobUrl) URL.revokeObjectURL(viewDoc.blobUrl); setViewDoc(null) }} style={{ background:'none', border:'none', color: '#94a3b8', cursor:'pointer', fontSize:20, lineHeight:1 }}>×</button>
+              </div>
+            </div>
+
+            {/* Error state */}
+            {viewDoc.error && (
+              <div style={{ background:'#1e293b', borderRadius:'0 0 12px 12px', padding:'32px 28px', textAlign:'center', minWidth:320 }}>
+                <div style={{ fontSize:32, marginBottom:12 }}>📁</div>
+                <div style={{ color:'#f87171', fontWeight:700, fontSize:14, marginBottom:8 }}>File Not Available</div>
+                <div style={{ color: '#94a3b8', fontSize:13, lineHeight:1.6 }}>{viewDoc.error}</div>
+              </div>
+            )}
+
+            {/* Protected content */}
+            {!viewDoc.error && (
+              <div
+                style={{ position:'relative', overflow:'hidden', borderRadius:'0 0 12px 12px' }}
+                onContextMenu={e => e.preventDefault()}
+              >
+                <div>
+                  {viewDoc.isImage ? (
+                    <img
+                      src={viewDoc.blobUrl}
+                      alt="Document"
+                      draggable={false}
+                      style={{ maxWidth:'85vw', maxHeight:'75vh', display:'block', userSelect:'none', WebkitUserDrag:'none', pointerEvents:'none' }}
+                    />
+                  ) : (
+                    <iframe
+                      src={`${viewDoc.blobUrl}#toolbar=0&navpanes=0&scrollbar=0`}
+                      style={{ width:'80vw', height:'75vh', border:'none' }}
+                      title="Document viewer"
+                    />
+                  )}
+                </div>
+
+                {/* Watermark overlay */}
+                <div style={{
+                  position:'absolute', inset:0, pointerEvents:'none',
+                  background:'repeating-linear-gradient(45deg, transparent, transparent 80px, rgba(100,116,139,0.06) 80px, rgba(100,116,139,0.06) 160px)',
+                  display:'flex', alignItems:'center', justifyContent:'center', overflow:'hidden',
+                }}>
+                  {Array.from({ length: 12 }).map((_, i) => (
+                    <span key={i} style={{
+                      position:'absolute',
+                      top: `${(i % 4) * 28}%`,
+                      left: `${Math.floor(i / 4) * 35}%`,
+                      fontSize:13, fontWeight:700, color:'rgba(100,116,139,0.18)',
+                      transform:'rotate(-30deg)', whiteSpace:'nowrap', userSelect:'none',
+                    }}>
+                      CONFIDENTIAL · TRAVEL TOURIST VISA EXPERT
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+          <p style={{ color:'rgba(255,255,255,0.4)', fontSize:12, marginTop:12 }}>Click outside to close · Downloading is not permitted</p>
+        </div>
+      )}
     </div>
   )
 }
