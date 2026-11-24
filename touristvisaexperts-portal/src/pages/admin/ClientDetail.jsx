@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router'
-import { getClient, updateClient, assignClient, updateStatus, getTeam, getClientActivity, grantAccess } from '../../api/admin'
+import { getClient, updateClient, assignClient, updateStatus, getTeam, getClientActivity, grantAccess, getClientDocuments, downloadClientDocument } from '../../api/admin'
 import { resolveFlag } from '../../api/team'
 import { PageSpinner } from '../../components/shared/Spinner'
 import StatusBadge from '../../components/shared/StatusBadge'
 import Modal from '../../components/shared/Modal'
 import { INTERNAL_STAGES, STAGE_COUNT, APPOINTMENT_MODULE, taskLabel, stageName } from '../../constants/workflow'
 
-const TABS = ['overview','stages','activity','family','info']
+const TABS = ['overview','stages','documents','activity','family','info']
 
 const CLIENT_STATUSES = [
   'Welcome & Consultation Pending','Profile Assessment','Documents Requested',
@@ -30,6 +30,9 @@ export default function AdminClientDetail() {
   const [loading, setLoading] = useState(true)
   const [activity, setActivity] = useState([])
   const [activityLoading, setActivityLoading] = useState(false)
+  const [docs, setDocs] = useState([])
+  const [docsLoading, setDocsLoading] = useState(false)
+  const [downloadingDoc, setDownloadingDoc] = useState(null)
   const [editModal, setEditModal] = useState(false)
   const [assignModal, setAssignModal] = useState(false)
   const [assignTo, setAssignTo] = useState('')
@@ -41,6 +44,14 @@ export default function AdminClientDetail() {
   const [statusOverride, setStatusOverride] = useState('')
   const [statusSaving, setStatusSaving] = useState(false)
 
+  const loadDocs = () => {
+    setDocsLoading(true)
+    getClientDocuments(id)
+      .then((r) => setDocs(r.data.data || []))
+      .catch(() => setDocs([]))
+      .finally(() => setDocsLoading(false))
+  }
+
   const load = () => {
     setLoading(true)
     Promise.all([getClient(id), getTeam()])
@@ -50,6 +61,7 @@ export default function AdminClientDetail() {
         setAssignTo(cr.data.data.assignedTo?._id || '')
       })
       .finally(() => setLoading(false))
+    loadDocs()
   }
 
   useEffect(() => { load() }, [id])
@@ -98,6 +110,25 @@ export default function AdminClientDetail() {
       setClient(c => ({ ...c, flagged: false, flagMessage: '' }))
     } catch { alert('Failed to resolve flag') }
     finally { setResolvingFlag(false) }
+  }
+
+  const handleDownloadDoc = async (doc) => {
+    setDownloadingDoc(doc._id)
+    try {
+      const res = await downloadClientDocument(id, doc._id)
+      const url = window.URL.createObjectURL(new Blob([res.data], { type: doc.mimeType || 'application/octet-stream' }))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', doc.originalName || 'document')
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+    } catch {
+      alert('Failed to download document')
+    } finally {
+      setDownloadingDoc(null)
+    }
   }
 
   if (loading) return <PageSpinner />
@@ -339,6 +370,110 @@ export default function AdminClientDetail() {
               </div>
             )
           })}
+        </div>
+      )}
+
+      {/* Documents Tab */}
+      {activeTab === 'documents' && (
+        <div style={{ background:'#fff', borderRadius:16, border:'1px solid #f1f5f9', padding:24, boxShadow:'0 1px 4px rgba(0,0,0,0.04)' }}>
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:20, flexWrap:'wrap', gap:12 }}>
+            <div>
+              <h3 style={{ fontSize:15, fontWeight:700, color:'#0f172a', margin:0 }}>Uploaded Documents</h3>
+              <p style={{ fontSize:12.5, color:'#64748b', margin:'3px 0 0' }}>All documents submitted by this client and prepared by staff</p>
+            </div>
+            <span style={{ padding:'3px 12px', borderRadius:99, fontSize:12, fontWeight:700, background:'#eff6ff', color:'#2563eb', border:'1px solid #bfdbfe' }}>
+              {docs.length} Total Document{docs.length === 1 ? '' : 's'}
+            </span>
+          </div>
+
+          {docsLoading ? (
+            <PageSpinner />
+          ) : docs.length === 0 ? (
+            <div style={{ textAlign:'center', padding:'48px 20px', background:'#f8fafc', borderRadius:14, border:'1px dashed #cbd5e1' }}>
+              <div style={{ fontSize:36, marginBottom:8 }}>📁</div>
+              <p style={{ fontWeight:700, color:'#334155', fontSize:14, margin:0 }}>No documents uploaded yet</p>
+              <p style={{ fontSize:12.5, color:'#94a3b8', margin:'4px 0 0' }}>The client has not uploaded any documents for this application yet.</p>
+            </div>
+          ) : (
+            <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+              {docs.map((doc) => {
+                const isClientUpload = doc.uploadedByRole === 'client'
+                const isPdf = doc.mimeType?.includes('pdf')
+                const isImage = doc.mimeType?.includes('image')
+                return (
+                  <div
+                    key={doc._id}
+                    style={{
+                      background:'#fff',
+                      borderRadius:14,
+                      border:'1.5px solid #f1f5f9',
+                      padding:'16px 18px',
+                      display:'flex',
+                      alignItems:'center',
+                      justifyContent:'space-between',
+                      gap:16,
+                      flexWrap:'wrap',
+                      transition:'all 0.15s',
+                      boxShadow:'0 1px 3px rgba(0,0,0,0.03)',
+                    }}
+                  >
+                    <div style={{ display:'flex', alignItems:'center', gap:14, minWidth:0, flex:1 }}>
+                      <div style={{
+                        width:44, height:44, borderRadius:12, flexShrink:0,
+                        background: isPdf ? '#fef2f2' : isImage ? '#f0fdf4' : '#eff6ff',
+                        color: isPdf ? '#ef4444' : isImage ? '#16a34a' : '#3b82f6',
+                        display:'flex', alignItems:'center', justifyContent:'center',
+                        fontSize:20, border:`1px solid ${isPdf ? '#fecaca' : isImage ? '#bbf7d0' : '#bfdbfe'}`
+                      }}>
+                        {isPdf ? '📄' : isImage ? '🖼️' : '📎'}
+                      </div>
+                      <div style={{ minWidth:0, flex:1 }}>
+                        <div style={{ fontSize:13.5, fontWeight:700, color:'#0f172a', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>
+                          {doc.originalName}
+                        </div>
+                        <div style={{ display:'flex', alignItems:'center', gap:8, marginTop:4, flexWrap:'wrap' }}>
+                          <span style={{ padding:'2px 8px', borderRadius:99, fontSize:10.5, fontWeight:700, background:'#f8fafc', color:'#475569', border:'1px solid #e2e8f0', textTransform:'capitalize' }}>
+                            {doc.category?.replace(/_/g, ' ') || 'Document'}
+                          </span>
+                          {doc.familyMember && (
+                            <span style={{ padding:'2px 8px', borderRadius:99, fontSize:10.5, fontWeight:700, background:'#faf5ff', color:'#7c3aed', border:'1px solid #ddd6fe' }}>
+                              👤 {doc.familyMember}
+                            </span>
+                          )}
+                          <span style={{ fontSize:11.5, color: isClientUpload ? '#16a34a' : '#2563eb', fontWeight:600 }}>
+                            {isClientUpload ? 'Uploaded by Client' : 'Uploaded by Team'}
+                          </span>
+                          <span style={{ fontSize:11, color:'#94a3b8' }}>
+                            · {new Date(doc.createdAt).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleDownloadDoc(doc)}
+                      disabled={downloadingDoc === doc._id}
+                      className="btn-secondary"
+                      style={{
+                        fontSize:12.5, fontWeight:700, display:'flex', alignItems:'center', gap:6, padding:'7px 14px', borderRadius:9,
+                        background:'#f8fafc', border:'1px solid #cbd5e1', cursor:'pointer'
+                      }}
+                    >
+                      {downloadingDoc === doc._id ? (
+                        'Downloading…'
+                      ) : (
+                        <>
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+                          </svg>
+                          Download
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
       )}
 

@@ -4,6 +4,9 @@ export const getDashboard = () => api.get('/admin/dashboard')
 
 export const getClients = (params) => api.get('/admin/clients', { params })
 export const getClient = (id) => api.get(`/admin/clients/${id}`)
+export const getClientDocuments = (id) => api.get(`/admin/clients/${id}/documents`)
+export const downloadClientDocument = (clientId, docId) =>
+  api.get(`/admin/clients/${clientId}/documents/${docId}/download`, { responseType: 'blob' })
 export const createClient = (data) => api.post('/admin/clients', data)
 export const updateClient = (id, data) => api.put(`/admin/clients/${id}`, data)
 export const assignClient = (id, assignedTo) =>

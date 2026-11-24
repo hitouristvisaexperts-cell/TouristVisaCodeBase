@@ -31,7 +31,7 @@ const {
   listTestimonials, createTestimonial, updateTestimonial, deleteTestimonial,
   reorderTestimonials, importDefaultTestimonials,
 } = require('../controllers/testimonialController');
-const { updateStatus } = require('../controllers/teamController');
+const { updateStatus, getDocuments, downloadDocument } = require('../controllers/teamController');
 
 // All admin routes require auth + admin role
 router.use(protect, authorize(ROLES.ADMIN));
@@ -58,6 +58,8 @@ router.post(
 );
 router.get('/clients', getClients);
 router.get('/clients/:id', getClient);
+router.get('/clients/:id/documents', getDocuments);
+router.get('/clients/:id/documents/:docId/download', downloadDocument);
 router.put('/clients/:id', updateClient);
 router.put('/clients/:id/access', grantAccess);
 router.put(
