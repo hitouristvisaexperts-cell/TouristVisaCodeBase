@@ -57,6 +57,10 @@ export function VdPassportReviews() {
   const [animKey, setAnimKey] = useState(0);
   const [dir, setDir] = useState<"next" | "prev">("next");
 
+  if (!testimonials || testimonials.length === 0) {
+    return null;
+  }
+
   const go = (d: "next" | "prev") => {
     setDir(d);
     setPage((p) => (d === "next" ? (p + 1) % totalPages : (p - 1 + totalPages) % totalPages));

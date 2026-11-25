@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router'
-import { getClient, updateClient, assignClient, updateStatus, getTeam, getClientActivity, grantAccess, getClientDocuments, downloadClientDocument } from '../../api/admin'
+import { getClient, updateClient, assignClient, updateStatus, getTeam, getClientActivity, grantAccess, getClientDocuments, downloadClientDocument, processRefund } from '../../api/admin'
 import { resolveFlag } from '../../api/team'
 import { PageSpinner } from '../../components/shared/Spinner'
 import StatusBadge from '../../components/shared/StatusBadge'
@@ -46,6 +46,11 @@ export default function AdminClientDetail() {
   const [resolvingFlag, setResolvingFlag] = useState(false)
   const [statusOverride, setStatusOverride] = useState('')
   const [statusSaving, setStatusSaving] = useState(false)
+  const [refundModal, setRefundModal] = useState(false)
+  const [refundForm, setRefundForm] = useState({ amount: '', reason: '' })
+  const [refundSaving, setRefundSaving] = useState(false)
+  const [refundError, setRefundError] = useState('')
+  const [refundSuccess, setRefundSuccess] = useState('')
 
   const loadDocs = () => {
     setDocsLoading(true)
@@ -129,6 +134,41 @@ export default function AdminClientDetail() {
     }
   }
 
+  const handleProcessRefund = async (e) => {
+    e.preventDefault()
+    setRefundError('')
+    setRefundSuccess('')
+    const amt = parseFloat(refundForm.amount)
+    if (!amt || amt <= 0) {
+      setRefundError('Please enter a valid refund amount greater than 0')
+      return
+    }
+    const maxRefund = (client.paidAmount || 0) - (client.refundAmount || 0)
+    if (client.paidAmount > 0 && amt > maxRefund) {
+      setRefundError(`Refund amount cannot exceed remaining balance of ₹${maxRefund.toLocaleString('en-IN')}`)
+      return
+    }
+    setRefundSaving(true)
+    try {
+      const res = await processRefund(id, { refundAmount: amt, reason: refundForm.reason })
+      if (res.data?.data) {
+        setClient(res.data.data)
+      } else {
+        load()
+      }
+      setRefundSuccess(`Successfully recorded refund of ₹${amt.toLocaleString('en-IN')}`)
+      setTimeout(() => {
+        setRefundModal(false)
+        setRefundForm({ amount: '', reason: '' })
+        setRefundSuccess('')
+      }, 1000)
+    } catch (err) {
+      setRefundError(err.response?.data?.message || 'Failed to process refund')
+    } finally {
+      setRefundSaving(false)
+    }
+  }
+
   if (loading) return <PageSpinner />
   if (!client) return <div style={{ color:'#f43f5e', padding:20 }}>Client not found</div>
 
@@ -165,8 +205,25 @@ export default function AdminClientDetail() {
                 color: client.isPurchased ? '#16a34a' : '#92400e',
                 border: client.isPurchased ? '1px solid #bbf7d0' : '1px solid #fde68a',
               }}>
-                {client.isPurchased ? 'Purchased' : 'Not Purchased'}
+                {client.isPurchased ? `Purchased${client.paidAmount ? ` · ₹${client.paidAmount.toLocaleString('en-IN')}` : ''}` : 'Not Purchased'}
               </span>
+              {client.couponUsed && (
+                <span style={{
+                  padding:'2px 8px', borderRadius:99, fontSize:11, fontWeight:700,
+                  background:'#fef3c7', color:'#92400e', border:'1px solid #fde68a',
+                  display:'inline-flex', alignItems:'center', gap:4
+                }}>
+                  🏷️ {client.couponUsed}
+                </span>
+              )}
+              {client.refundStatus && client.refundStatus !== 'none' && (
+                <span style={{
+                  padding:'2px 8px', borderRadius:99, fontSize:11, fontWeight:700,
+                  background:'#fef2f2', color:'#dc2626', border:'1px solid #fecaca',
+                }}>
+                  {client.refundStatus === 'full' ? 'Fully Refunded' : `Refunded ₹${client.refundAmount?.toLocaleString('en-IN')}`}
+                </span>
+              )}
               <span style={{ fontSize:12.5, color: '#64748b' }}>{client.user?.email}</span>
               {client.user?.phone && <span style={{ fontSize:12.5, color: '#64748b' }}>{client.user?.phone}</span>}
             </div>
@@ -540,19 +597,173 @@ export default function AdminClientDetail() {
 
       {/* Info */}
       {activeTab === 'info' && (
-        <div style={{ background:'#fff', borderRadius:16, border:'1px solid #f1f5f9', padding:24, boxShadow:'0 1px 4px rgba(0,0,0,0.04)' }}>
-          <h3 style={{ fontSize:14, fontWeight:700, color:'#0f172a', marginBottom:18 }}>Personal Information</h3>
-          <div className="r-grid-2" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:0 }}>
-            {[
-              ['Full Name', client.user?.name],['Email', client.user?.email],
-              ['Phone', client.user?.phone],['Passport No', client.passportNumber],
-              ['Nationality', client.nationality],['Date of Birth', client.dateOfBirth ? new Date(client.dateOfBirth).toLocaleDateString() : null],
-              ['Travel Date', client.travelDate ? new Date(client.travelDate).toLocaleDateString() : null],
-              ['No. of Applicants', client.numberOfApplicants],
-              ['Joined', new Date(client.user?.createdAt).toLocaleDateString()],
-            ].map(([label, value]) => (
-              <InfoRow key={label} label={label} value={value} />
-            ))}
+        <div style={{ display:'flex', flexDirection:'column', gap:20 }}>
+          {/* Personal Information */}
+          <div style={{ background:'#fff', borderRadius:16, border:'1px solid #f1f5f9', padding:24, boxShadow:'0 1px 4px rgba(0,0,0,0.04)' }}>
+            <h3 style={{ fontSize:14, fontWeight:700, color:'#0f172a', marginBottom:18, display:'flex', alignItems:'center', gap:8 }}>
+              <span>👤</span> Personal Information
+            </h3>
+            <div className="r-grid-2" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:0 }}>
+              {[
+                ['Full Name', client.user?.name],['Email', client.user?.email],
+                ['Phone', client.user?.phone],['Passport No', client.passportNumber],
+                ['Nationality', client.nationality],['Date of Birth', client.dateOfBirth ? new Date(client.dateOfBirth).toLocaleDateString() : null],
+                ['Travel Date', client.travelDate ? new Date(client.travelDate).toLocaleDateString() : null],
+                ['No. of Applicants', client.numberOfApplicants],
+                ['Joined', new Date(client.user?.createdAt).toLocaleDateString()],
+              ].map(([label, value]) => (
+                <InfoRow key={label} label={label} value={value} />
+              ))}
+            </div>
+          </div>
+
+          {/* Payment & Coupon Information */}
+          <div style={{ background:'#fff', borderRadius:16, border:'1px solid #f1f5f9', padding:24, boxShadow:'0 1px 4px rgba(0,0,0,0.04)' }}>
+            <h3 style={{ fontSize:14, fontWeight:700, color:'#0f172a', marginBottom:18, display:'flex', alignItems:'center', gap:8 }}>
+              <span>💳</span> Payment & Coupon Details
+            </h3>
+            <div className="r-grid-2" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:0 }}>
+              <InfoRow
+                label="Payment Status"
+                value={
+                  <span style={{
+                    fontSize:12, fontWeight:700, padding:'2px 8px', borderRadius:6,
+                    background: client.isPurchased ? '#f0fdf4' : '#fef9c3',
+                    color: client.isPurchased ? '#16a34a' : '#92400e',
+                    border: client.isPurchased ? '1px solid #bbf7d0' : '1px solid #fde68a',
+                  }}>
+                    {client.isPurchased ? 'Paid / Purchased' : 'Unpaid (Free Access)'}
+                  </span>
+                }
+              />
+              <InfoRow
+                label="Amount Paid"
+                value={
+                  client.paidAmount ? (
+                    <span style={{ fontSize:15, fontWeight:800, color:'#0f172a' }}>
+                      ₹{client.paidAmount.toLocaleString('en-IN')}
+                    </span>
+                  ) : client.isPurchased ? (
+                    <span style={{ color:'#64748b', fontStyle:'italic' }}>Granted by admin (₹0)</span>
+                  ) : '₹0'
+                }
+              />
+              <InfoRow
+                label="Coupon Used"
+                value={
+                  client.couponUsed ? (
+                    <span style={{
+                      display:'inline-flex', alignItems:'center', gap:5,
+                      padding:'3px 10px', borderRadius:6,
+                      background:'linear-gradient(135deg,#fef3c7,#fffbeb)',
+                      color:'#92400e', fontWeight:700, fontSize:12.5,
+                      border:'1px solid #fde68a'
+                    }}>
+                      🎟️ {client.couponUsed}
+                    </span>
+                  ) : (
+                    <span style={{ color:'#94a3b8' }}>None (Full Price)</span>
+                  )
+                }
+              />
+              <InfoRow label="Package Type" value={client.packageType || 'Complete'} />
+              <InfoRow
+                label="Payment ID"
+                value={
+                  client.paymentId ? (
+                    <span style={{ fontFamily:'monospace', fontSize:12, background:'#f8fafc', padding:'2px 6px', borderRadius:4, border:'1px solid #e2e8f0' }}>
+                      {client.paymentId}
+                    </span>
+                  ) : '—'
+                }
+              />
+              <InfoRow
+                label="Last Updated"
+                value={client.updatedAt ? new Date(client.updatedAt).toLocaleString('en-IN', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—'}
+              />
+            </div>
+          </div>
+
+          {/* Refund Section & Amount */}
+          <div style={{ background:'#fff', borderRadius:16, border:'1px solid #f1f5f9', padding:24, boxShadow:'0 1px 4px rgba(0,0,0,0.04)' }}>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:18, flexWrap:'wrap', gap:12 }}>
+              <div>
+                <h3 style={{ fontSize:14, fontWeight:700, color:'#0f172a', margin:0, display:'flex', alignItems:'center', gap:8 }}>
+                  <span>💸</span> Refund Details & Processing
+                </h3>
+                <p style={{ fontSize:12, color:'#64748b', margin:'4px 0 0' }}>Manage and track refunds for this client's payment</p>
+              </div>
+
+              {client.isPurchased && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const remaining = Math.max(0, (client.paidAmount || 0) - (client.refundAmount || 0))
+                    setRefundForm({ amount: remaining > 0 ? remaining : '', reason: '' })
+                    setRefundError('')
+                    setRefundSuccess('')
+                    setRefundModal(true)
+                  }}
+                  disabled={client.paidAmount > 0 && (client.refundAmount || 0) >= client.paidAmount}
+                  style={{
+                    padding:'8px 16px', borderRadius:10, fontSize:13, fontWeight:700, cursor: (client.paidAmount > 0 && (client.refundAmount || 0) >= client.paidAmount) ? 'default' : 'pointer',
+                    background: (client.paidAmount > 0 && (client.refundAmount || 0) >= client.paidAmount) ? '#f1f5f9' : '#fef2f2',
+                    color: (client.paidAmount > 0 && (client.refundAmount || 0) >= client.paidAmount) ? '#94a3b8' : '#dc2626',
+                    border: (client.paidAmount > 0 && (client.refundAmount || 0) >= client.paidAmount) ? '1px solid #e2e8f0' : '1px solid #fecaca',
+                    display:'inline-flex', alignItems:'center', gap:6
+                  }}
+                >
+                  <span>↩</span> Issue / Record Refund
+                </button>
+              )}
+            </div>
+
+            {/* Refund Metric Cards */}
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(180px, 1fr))', gap:14, marginBottom:20 }}>
+              <div style={{ background:'#f8fafc', borderRadius:12, border:'1px solid #f1f5f9', padding:'14px 16px' }}>
+                <div style={{ fontSize:11, fontWeight:700, color:'#64748b', textTransform:'uppercase', letterSpacing:'0.05em' }}>Paid Amount</div>
+                <div style={{ fontSize:20, fontWeight:800, color:'#0f172a', marginTop:6 }}>
+                  ₹{(client.paidAmount || 0).toLocaleString('en-IN')}
+                </div>
+              </div>
+              <div style={{ background:'#fef2f2', borderRadius:12, border:'1px solid #fee2e2', padding:'14px 16px' }}>
+                <div style={{ fontSize:11, fontWeight:700, color:'#991b1b', textTransform:'uppercase', letterSpacing:'0.05em' }}>Total Refunded</div>
+                <div style={{ fontSize:20, fontWeight:800, color:'#dc2626', marginTop:6 }}>
+                  ₹{(client.refundAmount || 0).toLocaleString('en-IN')}
+                </div>
+              </div>
+              <div style={{ background:'#f0fdf4', borderRadius:12, border:'1px solid #dcfce7', padding:'14px 16px' }}>
+                <div style={{ fontSize:11, fontWeight:700, color:'#166534', textTransform:'uppercase', letterSpacing:'0.05em' }}>Remaining Balance</div>
+                <div style={{ fontSize:20, fontWeight:800, color:'#16a34a', marginTop:6 }}>
+                  ₹{Math.max(0, (client.paidAmount || 0) - (client.refundAmount || 0)).toLocaleString('en-IN')}
+                </div>
+              </div>
+              <div style={{ background:'#faf5ff', borderRadius:12, border:'1px solid #f3e8ff', padding:'14px 16px' }}>
+                <div style={{ fontSize:11, fontWeight:700, color:'#6b21a8', textTransform:'uppercase', letterSpacing:'0.05em' }}>Refund Status</div>
+                <div style={{ marginTop:6 }}>
+                  <span style={{
+                    fontSize:12, fontWeight:700, padding:'3px 10px', borderRadius:99, textTransform:'uppercase',
+                    background: client.refundStatus === 'full' ? '#fee2e2' : client.refundStatus === 'partial' ? '#fef3c7' : '#f1f5f9',
+                    color: client.refundStatus === 'full' ? '#dc2626' : client.refundStatus === 'partial' ? '#d97706' : '#64748b',
+                    border: client.refundStatus === 'full' ? '1px solid #fca5a5' : client.refundStatus === 'partial' ? '1px solid #fde68a' : '1px solid #e2e8f0',
+                  }}>
+                    {client.refundStatus === 'full' ? 'Full Refund' : client.refundStatus === 'partial' ? 'Partial Refund' : 'None'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Refund History / Details if refunded */}
+            {client.refundAmount > 0 && (
+              <div style={{ background:'#fafafa', borderRadius:12, border:'1px solid #f1f5f9', padding:'16px 18px', marginTop:14 }}>
+                <div style={{ fontSize:12.5, fontWeight:700, color:'#334155', marginBottom:12 }}>Refund Information</div>
+                <div className="r-grid-2" style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:0 }}>
+                  <InfoRow label="Reason" value={client.refundReason || 'No reason specified'} />
+                  <InfoRow label="Refund Date" value={client.refundedAt ? new Date(client.refundedAt).toLocaleString('en-IN') : '—'} />
+                  <InfoRow label="Refunded By" value={client.refundedBy?.name || client.refundedBy?.email || 'Admin'} />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -646,6 +857,101 @@ export default function AdminClientDetail() {
           <div style={{ display:'flex', justifyContent:'flex-end', gap:10 }}>
             <button type="button" className="btn-secondary" onClick={() => setAssignModal(false)}>Cancel</button>
             <button type="submit" className="btn-primary" disabled={saving}>{saving ? 'Saving...' : 'Assign'}</button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Refund Modal */}
+      <Modal open={refundModal} onClose={() => { setRefundModal(false); setRefundError(''); setRefundSuccess('') }} title="Issue / Record Refund" size="md">
+        {refundError && (
+          <div style={{ background:'#fff1f2', border:'1px solid #fecdd3', borderRadius:10, padding:'10px 14px', color:'#f43f5e', fontSize:13, marginBottom:16 }}>
+            {refundError}
+          </div>
+        )}
+        {refundSuccess && (
+          <div style={{ background:'#f0fdf4', border:'1px solid #bbf7d0', borderRadius:10, padding:'10px 14px', color:'#16a34a', fontSize:13, marginBottom:16 }}>
+            {refundSuccess}
+          </div>
+        )}
+        <form onSubmit={handleProcessRefund} style={{ display:'flex', flexDirection:'column', gap:16 }}>
+          <div style={{ background:'#f8fafc', borderRadius:10, border:'1px solid #e2e8f0', padding:'12px 14px', fontSize:13 }}>
+            <div style={{ display:'flex', justifyContent:'space-between', marginBottom:5 }}>
+              <span style={{ color:'#64748b' }}>Client:</span>
+              <strong style={{ color:'#0f172a' }}>{client?.user?.name}</strong>
+            </div>
+            <div style={{ display:'flex', justifyContent:'space-between', marginBottom:5 }}>
+              <span style={{ color:'#64748b' }}>Total Paid:</span>
+              <strong style={{ color:'#0f172a' }}>₹{(client?.paidAmount || 0).toLocaleString('en-IN')}</strong>
+            </div>
+            <div style={{ display:'flex', justifyContent:'space-between', marginBottom:5 }}>
+              <span style={{ color:'#64748b' }}>Already Refunded:</span>
+              <strong style={{ color:'#dc2626' }}>₹{(client?.refundAmount || 0).toLocaleString('en-IN')}</strong>
+            </div>
+            <div style={{ display:'flex', justifyContent:'space-between', paddingTop:6, borderTop:'1px dashed #cbd5e1' }}>
+              <span style={{ color:'#64748b', fontWeight:600 }}>Max Refundable Balance:</span>
+              <strong style={{ color:'#16a34a' }}>₹{Math.max(0, (client?.paidAmount || 0) - (client?.refundAmount || 0)).toLocaleString('en-IN')}</strong>
+            </div>
+          </div>
+
+          <div>
+            <label className="label">Refund Amount (₹) <span style={{ color:'#f43f5e' }}>*</span></label>
+            <input
+              type="number"
+              step="1"
+              min="1"
+              max={Math.max(0, (client?.paidAmount || 0) - (client?.refundAmount || 0))}
+              className="input"
+              required
+              value={refundForm.amount}
+              onChange={(e) => setRefundForm({ ...refundForm, amount: e.target.value })}
+              placeholder="e.g. 5000"
+            />
+            {/* Quick amount helpers */}
+            {client?.paidAmount > 0 && (
+              <div style={{ display:'flex', gap:8, marginTop:8, flexWrap:'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => setRefundForm({ ...refundForm, amount: Math.max(0, (client.paidAmount || 0) - (client.refundAmount || 0)) })}
+                  style={{ padding:'4px 10px', fontSize:11.5, borderRadius:6, border:'1px solid #cbd5e1', background:'#fff', cursor:'pointer', fontWeight:600 }}
+                >
+                  Full Remaining (₹{Math.max(0, (client.paidAmount || 0) - (client.refundAmount || 0)).toLocaleString('en-IN')})
+                </button>
+                {Math.round((client.paidAmount || 0) / 2) <= Math.max(0, (client.paidAmount || 0) - (client.refundAmount || 0)) && (
+                  <button
+                    type="button"
+                    onClick={() => setRefundForm({ ...refundForm, amount: Math.round((client.paidAmount || 0) / 2) })}
+                    style={{ padding:'4px 10px', fontSize:11.5, borderRadius:6, border:'1px solid #cbd5e1', background:'#fff', cursor:'pointer', fontWeight:600 }}
+                  >
+                    50% (₹{Math.round((client.paidAmount || 0) / 2).toLocaleString('en-IN')})
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div>
+            <label className="label">Refund Reason <span style={{ color:'#f43f5e' }}>*</span></label>
+            <textarea
+              className="input"
+              rows={3}
+              required
+              placeholder="e.g. Visa rejection guarantee reimbursement, cancellation request..."
+              value={refundForm.reason}
+              onChange={(e) => setRefundForm({ ...refundForm, reason: e.target.value })}
+              style={{ resize:'vertical' }}
+            />
+          </div>
+
+          <div style={{ display:'flex', justifyContent:'flex-end', gap:10, paddingTop:6 }}>
+            <button type="button" className="btn-secondary" onClick={() => setRefundModal(false)}>Cancel</button>
+            <button
+              type="submit"
+              className="btn-primary"
+              disabled={refundSaving || !refundForm.amount || !refundForm.reason}
+              style={{ background:'#dc2626', borderColor:'#dc2626' }}
+            >
+              {refundSaving ? 'Recording...' : 'Confirm Refund'}
+            </button>
           </div>
         </form>
       </Modal>

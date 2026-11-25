@@ -94,6 +94,13 @@ const clientSchema = new mongoose.Schema(
     paymentId: { type: String, trim: true },
     orderId: { type: String, trim: true },
     isPurchased: { type: Boolean, default: false },
+    paidAmount:    { type: Number, default: 0 }, // in INR Rupees (e.g. 25000)
+    couponUsed:    { type: String, trim: true, default: '' },
+    refundAmount:  { type: Number, default: 0 }, // in INR Rupees (e.g. 5000)
+    refundStatus:  { type: String, enum: ['none', 'partial', 'full'], default: 'none' },
+    refundReason:  { type: String, trim: true, default: '' },
+    refundedAt:    { type: Date },
+    refundedBy:    { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     remarks: { type: String, trim: true, maxlength: 2000 },
 
     // Client-raised flag (issue at current stage)

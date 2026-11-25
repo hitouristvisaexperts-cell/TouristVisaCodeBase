@@ -40,8 +40,8 @@ const STEPS = [
     colorBorder: 'rgba(34,197,94,0.28)',
     gradFrom: '#22C55E',
     gradTo: '#4ADE80',
-    desc: 'Your visa arrives on time — delivered straight to your inbox or doorstep. We prioritize results while keeping you informed throughout.',
-    points: ['Embassy submission handled', 'Real-time status updates', 'Visa delivered to you'],
+    desc: 'From application submission to the final visa decision, we provide dedicated support, expert guidance and keep you informed throughout your journey.',
+    points: ['Embassy submission assistance', 'Application status updates', 'Support until the final decision'],
   },
 ]
 

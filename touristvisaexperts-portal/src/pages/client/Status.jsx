@@ -302,7 +302,12 @@ export default function ClientStatus() {
   if (loading) return <PageSpinner />
   if (!data) return <div style={{ color:'#f43f5e', padding:20 }}>Could not load your application.</div>
 
-  const { clientStatus, visaType, destinationCountry, travelDate, assignedTo, meetLink, meetScheduledAt, timeline, modules = [], familyMembers = [], flagged, flagMessage } = data
+  const {
+    clientStatus, visaType, destinationCountry, travelDate, assignedTo,
+    meetLink, meetScheduledAt, timeline, modules = [], familyMembers = [],
+    flagged, flagMessage, paidAmount, couponUsed, refundAmount,
+    refundStatus, refundReason, refundedAt, packageType
+  } = data
   const showBooking = clientStatus === 'Welcome & Consultation Pending' && !meetLink && calendlyUrl
   const completedCount = timeline.filter((s) => s.isCompleted).length
   const progress = Math.round((completedCount / timeline.length) * 100)
@@ -313,6 +318,56 @@ export default function ClientStatus() {
         <h1 className="page-title">My Application</h1>
         <p className="page-subtitle">Track your visa application in real time</p>
       </div>
+
+      {/* ── Refund Notice Card (Shown when admin has issued a refund) ── */}
+      {refundAmount > 0 && (
+        <div style={{
+          background: 'linear-gradient(135deg, #fff1f2 0%, #fef2f2 100%)',
+          border: '1.5px solid #fecdd3',
+          borderRadius: 18,
+          padding: '20px 24px',
+          boxShadow: '0 4px 16px rgba(244, 63, 94, 0.08)',
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: 16,
+        }}>
+          <div style={{
+            width: 44, height: 44, borderRadius: 14,
+            background: 'linear-gradient(135deg, #f43f5e, #e11d48)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: '#fff', fontSize: 22, flexShrink: 0,
+            boxShadow: '0 4px 12px rgba(244, 63, 94, 0.3)'
+          }}>
+            💸
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+              <h3 style={{ fontSize: 16, fontWeight: 800, color: '#9f1239', margin: 0 }}>
+                {refundStatus === 'full' ? 'Full Refund Processed' : 'Partial Refund Processed'}
+              </h3>
+              <span style={{
+                padding: '3px 10px', borderRadius: 99, fontSize: 12, fontWeight: 800,
+                background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5'
+              }}>
+                ₹{refundAmount.toLocaleString('en-IN')} Refunded
+              </span>
+            </div>
+            <p style={{ margin: '6px 0 0', fontSize: 13.5, color: '#881337', lineHeight: 1.55 }}>
+              A refund of <strong>₹{refundAmount.toLocaleString('en-IN')}</strong> was issued on{' '}
+              {refundedAt ? new Date(refundedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'recently'}.
+              {refundReason && <span> Reason: <em>"{refundReason}"</em>.</span>}
+            </p>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 14, marginTop: 10, flexWrap: 'wrap',
+              fontSize: 12, color: '#9f1239', opacity: 0.9, fontWeight: 600
+            }}>
+              <span>🏦 Credited to original payment source</span>
+              <span>•</span>
+              <span>⏱️ Expected in bank within 5–7 business days</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── First-Login Welcome & Onboarding Card ── */}
       {!welcomeDismissed && (
@@ -466,6 +521,26 @@ export default function ClientStatus() {
             {travelDate && <div style={{ fontSize:12, color:'rgba(255,255,255,0.55)', marginTop:4 }}>
               Travel date: {new Date(travelDate).toLocaleDateString()}
             </div>}
+            <div style={{ display:'flex', alignItems:'center', gap:8, marginTop:10, flexWrap:'wrap' }}>
+              <span style={{ fontSize:11.5, fontWeight:700, background:'rgba(255,255,255,0.18)', padding:'3px 9px', borderRadius:6 }}>
+                {packageType || 'Complete'} Package
+              </span>
+              {paidAmount > 0 && (
+                <span style={{ fontSize:11.5, fontWeight:700, background:'rgba(255,255,255,0.18)', padding:'3px 9px', borderRadius:6 }}>
+                  ₹{paidAmount.toLocaleString('en-IN')} Paid
+                </span>
+              )}
+              {couponUsed && (
+                <span style={{ fontSize:11.5, fontWeight:700, background:'rgba(255,255,255,0.22)', padding:'3px 9px', borderRadius:6 }}>
+                  🎟️ {couponUsed}
+                </span>
+              )}
+              {refundAmount > 0 && (
+                <span style={{ fontSize:11.5, fontWeight:800, background:'#fee2e2', color:'#dc2626', padding:'3px 9px', borderRadius:6 }}>
+                  ₹{refundAmount.toLocaleString('en-IN')} Refunded
+                </span>
+              )}
+            </div>
           </div>
 
           <div style={{ textAlign:'center', background:'rgba(255,255,255,0.12)', borderRadius:16, padding:'16px 24px' }}>

@@ -283,15 +283,40 @@ exports.getClients = async (req, res) => {
       query.user = { $in: users.map((u) => u._id) };
     }
 
-    const [data, total] = await Promise.all([
+    const [clientsList, total] = await Promise.all([
       Client.find(query)
         .populate('user', 'name email phone createdAt')
         .populate('assignedTo', 'name email')
+        .populate('refundedBy', 'name email')
         .sort({ updatedAt: -1 })
         .skip((safePage - 1) * safeLimit)
         .limit(safeLimit),
       Client.countDocuments(query),
     ]);
+
+    // Backfill paidAmount / couponUsed for any purchased clients where it was not directly set
+    const data = await Promise.all(
+      clientsList.map(async (c) => {
+        const clientObj = c.toObject();
+        if (c.isPurchased && (!clientObj.paidAmount || clientObj.paidAmount === 0)) {
+          const pr = await PaymentRecord.findOne({
+            $or: [{ ref: c._id }, { paymentId: c.paymentId }],
+          });
+          if (pr && pr.amount) {
+            clientObj.paidAmount = Math.round(pr.amount / 100);
+            Client.updateOne({ _id: c._id }, { paidAmount: clientObj.paidAmount }).catch(() => {});
+          }
+        }
+        if (!clientObj.couponUsed && c.remarks) {
+          const match = c.remarks.match(/Coupon used:\s*([^\r\n]+)/i);
+          if (match && match[1]) {
+            clientObj.couponUsed = match[1].trim();
+            Client.updateOne({ _id: c._id }, { couponUsed: clientObj.couponUsed }).catch(() => {});
+          }
+        }
+        return clientObj;
+      })
+    );
 
     res.json({ success: true, total, page: safePage, data });
   } catch (err) {
@@ -302,17 +327,43 @@ exports.getClients = async (req, res) => {
 // GET /api/admin/clients/:id
 exports.getClient = async (req, res) => {
   try {
-    const client = await Client.findById(req.params.id)
+    let client = await Client.findById(req.params.id)
       .populate('user', 'name email phone createdAt')
       .populate('assignedTo', 'name email')
+      .populate('refundedBy', 'name email')
       .populate('stages.tasks.completedBy', 'name');
 
     if (!client) return res.status(404).json({ success: false, message: 'Client not found' });
 
     // Backfill appointment module for older clients
     const { APPOINTMENT_MODULE } = require('../utils/constants');
+    let needsSave = false;
     if (!client.appointmentModule) {
       client.appointmentModule = { tasks: APPOINTMENT_MODULE.tasks.map((t) => ({ name: t, completed: false })) };
+      needsSave = true;
+    }
+
+    // Backfill paidAmount if purchased and missing
+    if (client.isPurchased && (!client.paidAmount || client.paidAmount === 0)) {
+      const pr = await PaymentRecord.findOne({
+        $or: [{ ref: client._id }, { paymentId: client.paymentId }],
+      });
+      if (pr && pr.amount) {
+        client.paidAmount = Math.round(pr.amount / 100);
+        needsSave = true;
+      }
+    }
+
+    // Backfill couponUsed from remarks if missing
+    if (!client.couponUsed && client.remarks) {
+      const match = client.remarks.match(/Coupon used:\s*([^\r\n]+)/i);
+      if (match && match[1]) {
+        client.couponUsed = match[1].trim();
+        needsSave = true;
+      }
+    }
+
+    if (needsSave) {
       await client.save();
     }
 
@@ -507,5 +558,67 @@ exports.sendClientNotification = async (req, res) => {
     res.json({ success: true, message: 'Notification sent' });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// POST /api/admin/clients/:id/refund — process and record refund
+exports.processRefund = async (req, res) => {
+  try {
+    const { refundAmount, reason } = req.body;
+    const amount = Number(refundAmount);
+    if (isNaN(amount) || amount <= 0) {
+      return res.status(400).json({ success: false, message: 'Invalid refund amount. Must be greater than 0.' });
+    }
+
+    const client = await Client.findById(req.params.id).populate('user', 'name email');
+    if (!client) return res.status(404).json({ success: false, message: 'Client not found' });
+    if (!client.isPurchased) {
+      return res.status(400).json({ success: false, message: 'Cannot refund an unpurchased/free client.' });
+    }
+
+    const currentPaid = client.paidAmount || 0;
+    const currentRefund = client.refundAmount || 0;
+    const newTotalRefund = currentRefund + amount;
+
+    if (currentPaid > 0 && newTotalRefund > currentPaid) {
+      return res.status(400).json({
+        success: false,
+        message: `Refund amount exceeds remaining balance. Max refundable: ₹${(currentPaid - currentRefund).toLocaleString('en-IN')}`,
+      });
+    }
+
+    client.refundAmount = newTotalRefund;
+    client.refundStatus = (currentPaid > 0 && newTotalRefund >= currentPaid) ? 'full' : 'partial';
+    client.refundReason = reason?.trim() || client.refundReason || 'Admin processed refund';
+    client.refundedAt = new Date();
+    client.refundedBy = req.user._id;
+
+    await client.save();
+
+    // Log client activity
+    await ClientActivity.create({
+      client: client._id,
+      actor: req.user._id,
+      action: 'Refund Processed',
+      details: `₹${amount.toLocaleString('en-IN')} refund recorded. Total refund: ₹${newTotalRefund.toLocaleString('en-IN')}. Reason: ${reason || 'N/A'}`,
+    });
+
+    // Audit log
+    await AuditLog.create({
+      action: 'PROCESS_REFUND',
+      performedBy: req.user._id,
+      targetUser: client.user?._id,
+      details: { clientId: client._id, refundAmount: amount, totalRefund: newTotalRefund, reason },
+    });
+
+    const updated = await Client.findById(client._id)
+      .populate('user', 'name email phone createdAt')
+      .populate('assignedTo', 'name email')
+      .populate('refundedBy', 'name email');
+
+    res.json({ success: true, message: 'Refund recorded successfully', data: updated });
+  } catch (err) {
+    console.error('processRefund error:', err);
+    res.status(500).json({ success: false, message: 'Failed to process refund' });
   }
 };

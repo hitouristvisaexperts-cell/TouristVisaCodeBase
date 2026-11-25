@@ -1,7 +1,4 @@
 import { useEffect, useState } from 'react'
-import avatarRohit from '@/assets/avatar-rohit.jpg'
-import avatarAnanya from '@/assets/avatar-ananya.jpg'
-import avatarArjun from '@/assets/avatar-arjun.jpg'
 
 export type Review = {
   id: string
@@ -15,15 +12,8 @@ export type Review = {
   stampType: 'DEPARTED' | 'ARRIVED'
 }
 
-// Shown until the admin publishes reviews from the portal (Admin → Testimonials)
-export const DEFAULT_REVIEWS: Review[] = [
-  { id: 'd1', country: 'USA',       quote: 'The team made my USA visa process so easy and stress-free. Got my visa in just a few days!', name: 'Rohit Mehta',   city: 'Mumbai, India',    avatar: avatarRohit,  rating: 5, stampDate: '15 MAY 2024', stampType: 'DEPARTED' },
-  { id: 'd2', country: 'UK',        quote: 'Excellent service and guidance at every step. Highly recommended!',                          name: 'Ananya Sharma', city: 'Delhi, India',     avatar: avatarAnanya, rating: 5, stampDate: '22 APR 2024', stampType: 'ARRIVED'  },
-  { id: 'd3', country: 'CANADA',    quote: 'Professional, reliable and very responsive. Got my Canada visa without any hassle.',         name: 'Arjun Nair',    city: 'Bangalore, India', avatar: avatarArjun,  rating: 5, stampDate: '10 JUN 2024', stampType: 'DEPARTED' },
-  { id: 'd4', country: 'AUSTRALIA', quote: 'Smooth and seamless experience. My Australia visa was approved faster than I expected!',     name: 'Priya Kapoor',  city: 'Chennai, India',   avatar: avatarAnanya, rating: 5, stampDate: '03 MAR 2024', stampType: 'ARRIVED'  },
-  { id: 'd5', country: 'SCHENGEN',  quote: 'They handled everything perfectly. Europe trip was a dream come true thanks to this team!',  name: 'Vikram Singh',  city: 'Pune, India',      avatar: avatarRohit,  rating: 5, stampDate: '18 JUL 2024', stampType: 'DEPARTED' },
-  { id: 'd6', country: 'DUBAI',     quote: 'Fast, efficient and very professional. Got my Dubai visa within 24 hours. Amazing service!', name: 'Sneha Reddy',   city: 'Hyderabad, India', avatar: avatarArjun,  rating: 5, stampDate: '29 AUG 2024', stampType: 'ARRIVED'  },
-]
+// Only real approved reviews published from the portal (Admin → Testimonials) are displayed
+export const DEFAULT_REVIEWS: Review[] = []
 
 const API = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '')
 
@@ -39,14 +29,17 @@ type ApiReview = { _id: string; country?: string; quote?: string; name?: string;
 let cached: Review[] | null = null
 let loading: Promise<Review[] | null> | null = null
 
-/** Fetches the published reviews once per visit; null = none published (keep the defaults). */
+/** Fetches the published reviews once per visit; null/empty = none published. */
 function loadReviews() {
   if (!loading) {
     loading = fetch(`${API}/testimonials`)
       .then(r => (r.ok ? r.json() : null))
       .then(d => {
         const list: ApiReview[] = Array.isArray(d?.data) ? d.data : []
-        if (!list.length) return null
+        if (!list.length) {
+          cached = []
+          return []
+        }
         cached = list.map((t, i) => ({
           id: String(t._id),
           country: String(t.country || '').toUpperCase(),
@@ -60,14 +53,14 @@ function loadReviews() {
         }))
         return cached
       })
-      .catch(() => null)
+      .catch(() => [])
   }
   return loading
 }
 
-/** Reviews for the "What Our Clients Say" sections — live from the portal, else the built-in ones. */
+/** Reviews for the "What Our Clients Say" sections — live from the database. */
 export function useReviews(): Review[] {
-  const [list, setList] = useState<Review[]>(cached ?? DEFAULT_REVIEWS)
+  const [list, setList] = useState<Review[]>(cached ?? [])
   useEffect(() => {
     let alive = true
     loadReviews().then(l => { if (alive && l) setList(l) })

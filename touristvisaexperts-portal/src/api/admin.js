@@ -38,6 +38,7 @@ export const resolveEscalation = (id, resolutionNote) =>
   api.put(`/admin/escalations/${id}/resolve`, { resolutionNote })
 export const getClientActivity = (clientId) => api.get(`/admin/clients/${clientId}/activity`)
 export const grantAccess = (id, isPurchased) => api.put(`/admin/clients/${id}/access`, { isPurchased })
+export const processRefund = (id, data) => api.post(`/admin/clients/${id}/refund`, data)
 
 export const getFlightOrders = (params) => api.get('/flight', { params })
 export const updateFlightOrder = (id, data) => api.put(`/flight/${id}`, data)

@@ -100,8 +100,17 @@ exports.createOrder = async (req, res) => {
       },
     });
   } catch (err) {
+    const errorDetail = err?.error?.description || err?.error?.message || err?.message || 'Payment initiation failed.';
     console.error('Create order error:', JSON.stringify(err?.error || err?.message || err));
-    res.status(500).json({ success: false, message: 'Payment initiation failed. Please try again.' });
+
+    if (err?.statusCode === 401 || err?.error?.code === 'BAD_REQUEST_ERROR' && err?.error?.description?.includes('Authentication failed')) {
+      return res.status(500).json({
+        success: false,
+        message: 'Razorpay authentication failed. Please check your RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in .env.',
+      });
+    }
+
+    res.status(500).json({ success: false, message: errorDetail });
   }
 };
 
@@ -166,6 +175,9 @@ exports.verifyPayment = async (req, res) => {
     }
 
     const assignedTeamMemberId = await getAutoAssignTarget();
+    const paidAmountRupees = amountPaid ? Math.round(amountPaid / 100) : (order?.amount ? Math.round(order.amount / 100) : 0);
+    const couponCode = notes.coupon || '';
+
     const client = await Client.create({
       user:               user._id,
       visaType,
@@ -175,6 +187,8 @@ exports.verifyPayment = async (req, res) => {
       paymentId:          razorpay_payment_id,
       orderId:            razorpay_order_id,
       isPurchased:        true,
+      paidAmount:         paidAmountRupees,
+      couponUsed:         couponCode,
       assignedTo:         assignedTeamMemberId,
       numberOfApplicants: applicantCount,
       ...(remarks && { remarks }),
@@ -808,6 +822,9 @@ exports.razorpayWebhook = async (req, res) => {
           }
 
           const assignedTeamMemberId = await getAutoAssignTarget();
+          const paidAmountRupees = amountPaid ? Math.round(amountPaid / 100) : 0;
+          const couponCode = notes.coupon || '';
+
           const client = await Client.create({
             user: user._id,
             visaType,
@@ -819,6 +836,8 @@ exports.razorpayWebhook = async (req, res) => {
             paymentId: razorpay_payment_id,
             orderId: razorpay_order_id,
             isPurchased: true,
+            paidAmount: paidAmountRupees,
+            couponUsed: couponCode,
             assignedTo: assignedTeamMemberId,
             numberOfApplicants: applicantCount,
           });

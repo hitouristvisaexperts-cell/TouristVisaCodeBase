@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { body } = require('express-validator');
-const { login, getMe, changePassword, register, forgotPassword, resetPassword, verifyRegistrationOtp, resendRegistrationOtp, logout, getSessionToken, googleLogin } = require('../controllers/authController');
+const { login, adminLogin, getMe, changePassword, register, forgotPassword, resetPassword, verifyRegistrationOtp, resendRegistrationOtp, logout, getSessionToken, googleLogin } = require('../controllers/authController');
 const { protect } = require('../middleware/auth');
 const validate = require('../middleware/validate');
 const { authLimiter } = require('../middleware/rateLimiter');
@@ -71,6 +71,29 @@ router.post(
   ],
   validate,
   login
+);
+
+// Dedicated Admin Login routes
+router.post(
+  '/admin/login',
+  authLimiter,
+  [
+    body('email').isEmail().normalizeEmail().withMessage('Valid email required'),
+    body('password').notEmpty().withMessage('Password required'),
+  ],
+  validate,
+  adminLogin
+);
+
+router.post(
+  '/admin-login',
+  authLimiter,
+  [
+    body('email').isEmail().normalizeEmail().withMessage('Valid email required'),
+    body('password').notEmpty().withMessage('Password required'),
+  ],
+  validate,
+  adminLogin
 );
 
 // Continue with Google (clients only) — body: { credential, consents? }

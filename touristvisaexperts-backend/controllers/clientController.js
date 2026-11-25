@@ -43,7 +43,7 @@ exports.getStatus = async (req, res) => {
   try {
     const client = await resolveClient(req)
       .populate('assignedTo', 'name email phone')
-      .select('clientStatus currentStageKey stages appointmentModule meetLink meetScheduledAt visaType destinationCountry travelDate isPurchased familyMembers numberOfApplicants flagged flagMessage flaggedAt flagStage');
+      .select('clientStatus currentStageKey stages appointmentModule meetLink meetScheduledAt visaType destinationCountry travelDate isPurchased familyMembers numberOfApplicants flagged flagMessage flaggedAt flagStage paidAmount couponUsed refundAmount refundStatus refundReason refundedAt packageType');
 
     if (!client) return res.status(404).json({ success: false, message: 'Client profile not found' });
 
@@ -119,6 +119,13 @@ exports.getStatus = async (req, res) => {
         timeline: stageOrder,
         modules,
         isPurchased: client.isPurchased,
+        packageType: client.packageType || 'Complete',
+        paidAmount: client.paidAmount || 0,
+        couponUsed: client.couponUsed || '',
+        refundAmount: client.refundAmount || 0,
+        refundStatus: client.refundStatus || 'none',
+        refundReason: client.refundReason || '',
+        refundedAt: client.refundedAt || null,
         numberOfApplicants: client.numberOfApplicants || 1,
         familyMembers: client.familyMembers || [],
         flagged: client.flagged,

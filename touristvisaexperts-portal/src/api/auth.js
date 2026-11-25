@@ -1,7 +1,10 @@
 import api from './axios'
 
-export const login = (email, password) =>
-  api.post('/auth/login', { email, password })
+export const login = (email, password, portal = 'client') =>
+  api.post('/auth/login', { email, password, portal })
+
+export const adminLogin = (email, password) =>
+  api.post('/auth/admin/login', { email, password, portal: 'admin' })
 
 // Continue with Google — consents only needed the first time (new account)
 export const googleLogin = (credential, consents) =>

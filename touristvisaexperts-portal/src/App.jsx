@@ -7,6 +7,7 @@ import { useEffect } from 'react'
 import { getMe } from './api/auth'
 
 import Login from './pages/Login'
+import AdminLogin from './pages/AdminLogin'
 import Register from './pages/Register'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
@@ -105,6 +106,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<RootRedirect />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/register" element={<Register />} />
           <Route path="/auth" element={<AuthCallback />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -112,7 +114,7 @@ export default function App() {
           <Route path="/change-password" element={<ProtectedRoute roles={['admin','manager','team','client']}><ChangePassword /></ProtectedRoute>} />
 
           {/* Admin Routes */}
-          <Route path="/admin" element={<ProtectedRoute roles={['admin']}><AppLayout /></ProtectedRoute>}>
+          <Route path="/admin" element={<ProtectedRoute roles={['admin']} loginPath="/admin/login"><AppLayout /></ProtectedRoute>}>
             <Route index element={<Navigate to="/admin/dashboard" replace />} />
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="clients" element={<AdminClients />} />

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router'
+import { Link, useNavigate, Navigate } from 'react-router'
 import { login } from '../api/auth'
 import { useAuth } from '../context/AuthContext'
 import GoogleSignIn from '../components/GoogleSignIn'
@@ -48,28 +48,43 @@ const inputStyle = {
 }
 
 export default function Login() {
-  const { loginUser } = useAuth()
+  const { user, loading: authLoading, loginUser } = useAuth()
   const navigate = useNavigate()
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [showPass, setShowPass] = useState(false)
 
+  // Redirect if already authenticated
+  if (!authLoading && user) {
+    if (user.role === 'admin') return <Navigate to="/admin/dashboard" replace />
+    if (user.role === 'client') return <Navigate to="/client/status" replace />
+    if (user.role === 'manager') return <Navigate to="/manager/dashboard" replace />
+    if (user.role === 'team') return <Navigate to="/team/clients" replace />
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
     setLoading(true)
     try {
-      const res = await login(form.email, form.password)
+      const res = await login(form.email, form.password, 'client')
       const data = res.data
+
+      // Only clients may log in through the Client Login page
+      if (data.user?.role === 'admin' || data.user?.role !== 'client') {
+        setError('Invalid credentials or unauthorized access.')
+        return
+      }
+
       loginUser(data.token, data.user)
       if (data.user.isFirstLogin) {
-        navigate('/change-password')
+        navigate('/change-password', { replace: true })
       } else {
-        navigate(ROLE_REDIRECT[data.user.role] || '/login')
+        navigate('/client/status', { replace: true })
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Invalid credentials. Please try again.')
+      setError(err.response?.data?.message || 'Invalid credentials or unauthorized access.')
     } finally {
       setLoading(false)
     }

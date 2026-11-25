@@ -22,6 +22,7 @@ const {
   resolveEscalation,
   getClientActivity,
   sendClientNotification,
+  processRefund,
 } = require('../controllers/adminController');
 
 const { createFAQ, updateFAQ, deleteFAQ } = require('../controllers/faqController');
@@ -62,6 +63,12 @@ router.get('/clients/:id/documents', getDocuments);
 router.get('/clients/:id/documents/:docId/download', downloadDocument);
 router.put('/clients/:id', updateClient);
 router.put('/clients/:id/access', grantAccess);
+router.post(
+  '/clients/:id/refund',
+  [body('refundAmount').notEmpty().isNumeric().withMessage('Valid refund amount is required')],
+  validate,
+  processRefund
+);
 router.put(
   '/clients/:id/assign',
   [body('assignedTo').notEmpty().isMongoId().withMessage('Invalid team member ID')],

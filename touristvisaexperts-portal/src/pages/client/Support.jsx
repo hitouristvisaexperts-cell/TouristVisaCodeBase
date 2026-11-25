@@ -83,13 +83,30 @@ export default function ClientSupport() {
       }}>
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           <div>
-            <label style={{
-              display: 'block', fontSize: 12, fontWeight: 700,
-              color: '#475569', marginBottom: 8, letterSpacing: '0.02em',
-              textTransform: 'uppercase',
-            }}>
-              Subject
-            </label>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom: 8 }}>
+              <label style={{
+                display: 'block', fontSize: 12, fontWeight: 700,
+                color: '#475569', letterSpacing: '0.02em',
+                textTransform: 'uppercase',
+              }}>
+                Subject
+              </label>
+              <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSubject('Refund Request (Visa Guarantee / Cancellation)')
+                    if (!message) setMessage('Hello Team,\n\nI would like to apply for a refund for my application.\n\nReason for refund:\n\nPayment / Bank details for confirmation:\n\nThank you.')
+                  }}
+                  style={{
+                    background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 6,
+                    padding: '2px 8px', fontSize: 11, fontWeight: 700, color: '#dc2626', cursor: 'pointer'
+                  }}
+                >
+                  💸 Apply for Refund
+                </button>
+              </div>
+            </div>
             <input
               type="text"
               value={subject}

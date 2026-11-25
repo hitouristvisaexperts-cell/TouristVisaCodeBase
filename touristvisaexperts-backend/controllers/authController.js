@@ -140,12 +140,12 @@ function sendRegistrationConfirmationEmail(user) {
 // POST /api/auth/login
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, portal } = req.body;
 
     const user = await User.findOne({ email }).select('+password +loginAttempts +lockUntil');
 
     if (!user) {
-      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+      return res.status(401).json({ success: false, message: 'Invalid credentials or unauthorized access.' });
     }
 
     if (user.isLocked()) {
@@ -162,7 +162,23 @@ exports.login = async (req, res) => {
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       await user.incrementLoginAttempts();
-      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+      return res.status(401).json({ success: false, message: 'Invalid credentials or unauthorized access.' });
+    }
+
+    // Role-based login validation:
+    if (portal === 'admin') {
+      // Dedicated Admin Login: Only administrators can log in
+      if (user.role !== ROLES.ADMIN) {
+        return res.status(401).json({ success: false, message: 'Invalid credentials or unauthorized access.' });
+      }
+    } else {
+      // Client Login: Admins must NOT be allowed to log in through client login
+      if (user.role === ROLES.ADMIN) {
+        return res.status(401).json({ success: false, message: 'Invalid credentials or unauthorized access.' });
+      }
+      if (portal === 'client' && user.role !== ROLES.CLIENT) {
+        return res.status(401).json({ success: false, message: 'Invalid credentials or unauthorized access.' });
+      }
     }
 
     await user.resetLoginAttempts();
@@ -174,7 +190,7 @@ exports.login = async (req, res) => {
       action: 'LOGIN',
       entity: 'User',
       entityId: user._id,
-      description: `User ${user.email} logged in`,
+      description: `User ${user.email} (${user.role}) logged in via ${portal || (user.role === ROLES.ADMIN ? 'admin' : 'client')} portal`,
       ipAddress: req.ip,
     });
 
@@ -199,6 +215,12 @@ exports.login = async (req, res) => {
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error' });
   }
+};
+
+// POST /api/auth/admin/login — Dedicated Admin Login endpoint
+exports.adminLogin = async (req, res) => {
+  req.body.portal = 'admin';
+  return exports.login(req, res);
 };
 
 // ─── Continue with Google ─────────────────────────────────────────────────────

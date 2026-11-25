@@ -122,8 +122,8 @@ export default function AdminClients() {
             <thead>
               <tr style={{ background:'#f8fafc', borderBottom:'1px solid #f1f5f9' }}>
                 {(tab === 'purchased'
-                  ? ['Client','Package','Payment ID','Purchase Date','Status','Assigned To','Actions']
-                  : ['Client','Visa / Country','Status','Assigned To','Access','Actions']
+                  ? ['Client','Package','Paid Amount','Coupon','Payment ID','Purchase Date','Status','Assigned To','Actions']
+                  : ['Client','Visa / Country','Status','Assigned To','Access / Amount','Actions']
                 ).map(h => (
                   <th key={h} style={{ textAlign:'left', padding:'12px 16px', fontSize:11, fontWeight:700, color:'#64748b', textTransform:'uppercase', letterSpacing:'0.06em' }}>{h}</th>
                 ))}
@@ -170,6 +170,25 @@ export default function AdminClients() {
                         </span>
                       </td>
                       <td style={{ padding:'14px 16px' }}>
+                        <div style={{ fontWeight:700, color:'#0f172a', fontSize:13.5 }}>
+                          {c.paidAmount ? `₹${c.paidAmount.toLocaleString('en-IN')}` : '—'}
+                        </div>
+                        {c.refundStatus && c.refundStatus !== 'none' && (
+                          <div style={{ fontSize:11, color:'#dc2626', fontWeight:600, marginTop:2 }}>
+                            {c.refundStatus === 'full' ? 'Refunded' : `Refund: ₹${c.refundAmount?.toLocaleString('en-IN')}`}
+                          </div>
+                        )}
+                      </td>
+                      <td style={{ padding:'14px 16px' }}>
+                        {c.couponUsed ? (
+                          <span style={{ padding:'2px 8px', borderRadius:6, background:'#fef3c7', color:'#92400e', fontSize:11.5, fontWeight:700, border:'1px solid #fde68a' }}>
+                            🏷️ {c.couponUsed}
+                          </span>
+                        ) : (
+                          <span style={{ color:'#94a3b8', fontSize:12 }}>—</span>
+                        )}
+                      </td>
+                      <td style={{ padding:'14px 16px' }}>
                         {c.paymentId ? (
                           <span style={{ fontFamily:'monospace', fontSize:11, color:'#475569', background:'#f8fafc', padding:'2px 6px', borderRadius:4 }}>
                             {c.paymentId}
@@ -197,13 +216,43 @@ export default function AdminClients() {
                         {c.assignedTo?.name || <span style={{ color: '#64748b', fontStyle:'italic' }}>Unassigned</span>}
                       </td>
                       <td style={{ padding:'14px 16px' }}>
-                        <span style={{
-                          fontSize:11.5, fontWeight:600, padding:'3px 8px', borderRadius:6,
-                          background: c.isPurchased ? '#f0fdf4' : '#fef9c3',
-                          color: c.isPurchased ? '#16a34a' : '#92400e',
-                        }}>
-                          {c.isPurchased ? 'Purchased' : 'Free'}
-                        </span>
+                        {c.isPurchased ? (
+                          <div style={{ display:'flex', flexDirection:'column', gap:3 }}>
+                            <div style={{ display:'flex', alignItems:'center', gap:6, flexWrap:'wrap' }}>
+                              <span style={{
+                                fontSize:11.5, fontWeight:700, padding:'3px 8px', borderRadius:6,
+                                background:'#f0fdf4', color:'#16a34a', border:'1px solid #bbf7d0',
+                              }}>
+                                Purchased
+                              </span>
+                              {c.paidAmount ? (
+                                <span style={{ fontSize:13, fontWeight:700, color:'#0f172a' }}>
+                                  ₹{c.paidAmount.toLocaleString('en-IN')}
+                                </span>
+                              ) : null}
+                            </div>
+                            {c.couponUsed && (
+                              <span style={{ fontSize:11, color:'#92400e', fontWeight:700 }}>
+                                🏷️ {c.couponUsed}
+                              </span>
+                            )}
+                            {c.refundStatus && c.refundStatus !== 'none' && (
+                              <span style={{
+                                fontSize:10.5, fontWeight:600, padding:'1px 6px', borderRadius:4,
+                                background:'#fef2f2', color:'#dc2626', border:'1px solid #fecaca', width:'fit-content'
+                              }}>
+                                {c.refundStatus === 'full' ? 'Refunded' : `Refund: ₹${c.refundAmount?.toLocaleString('en-IN')}`}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span style={{
+                            fontSize:11.5, fontWeight:600, padding:'3px 8px', borderRadius:6,
+                            background:'#fef9c3', color:'#92400e',
+                          }}>
+                            Free
+                          </span>
+                        )}
                       </td>
                     </>
                   )}

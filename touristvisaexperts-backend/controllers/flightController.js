@@ -35,8 +35,17 @@ exports.createOrder = async (req, res) => {
       },
     });
   } catch (err) {
+    const errorDetail = err?.error?.description || err?.error?.message || err?.message || 'Payment initiation failed.';
     console.error('Flight create order error:', JSON.stringify(err?.error || err?.message || err));
-    res.status(500).json({ success: false, message: 'Payment initiation failed. Please try again.' });
+
+    if (err?.statusCode === 401 || err?.error?.code === 'BAD_REQUEST_ERROR' && err?.error?.description?.includes('Authentication failed')) {
+      return res.status(500).json({
+        success: false,
+        message: 'Razorpay authentication failed. Please check your RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in .env.',
+      });
+    }
+
+    res.status(500).json({ success: false, message: errorDetail });
   }
 };
 

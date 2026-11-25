@@ -60,17 +60,21 @@ export const Testimonials = () => {
   const [dir, setDir] = useState<"next" | "prev">("next");
   const [isMobile, setIsMobile] = useState(false);
 
-  useState(() => {
+  useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
-  });
+  }, []);
 
   const pageSize = isMobile ? PAGE_SIZE_MOBILE : PAGE_SIZE_DESKTOP;
   const totalPages = Math.max(1, Math.ceil(testimonials.length / pageSize));
   // the list can shrink when the live reviews arrive — stay on a page that exists
   useEffect(() => { if (page >= totalPages) setPage(0); }, [page, totalPages]);
+
+  if (!testimonials || testimonials.length === 0) {
+    return null;
+  }
 
   const go = (d: "next" | "prev") => {
     setDir(d);
