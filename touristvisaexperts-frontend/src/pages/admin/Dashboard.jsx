@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router'
-import { getDashboard } from '../../api/admin'
+import { getDashboard, getClients } from '../../api/admin'
 import { PageSpinner } from '../../components/shared/Spinner'
 import StatusBadge from '../../components/shared/StatusBadge'
 
@@ -67,13 +67,22 @@ function Avatar({ name, size = 'w-9 h-9', color = 'bg-blue-100 text-blue-700' })
 
 export default function AdminDashboard() {
   const [data, setData] = useState(null)
+  const [clientsData, setClientsData] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const navigate = useNavigate()
 
   useEffect(() => {
-    getDashboard()
-      .then((r) => setData(r.data.data))
+    Promise.all([
+      getDashboard().then((r) => r.data.data),
+      getClients({ limit: 100 })
+        .then((r) => r.data.data?.clients || r.data.clients || [])
+        .catch(() => []),
+    ])
+      .then(([dashData, clData]) => {
+        setData(dashData)
+        setClientsData(clData)
+      })
       .catch((err) => console.error('Dashboard load failed:', err))
       .finally(() => setLoading(false))
   }, [])
@@ -95,6 +104,12 @@ export default function AdminDashboard() {
     pipelineFunnel = [],
     recentPayments = [],
   } = data || {}
+
+  const refundedClients = clientsData.filter(
+    (c) => (c.refundAmount && c.refundAmount > 0) || (c.refundStatus && c.refundStatus !== 'none')
+  )
+  const totalRefundAmount = refundedClients.reduce((sum, c) => sum + (c.refundAmount || 0), 0)
+  const netRevenue = Math.max(0, (revenue.total || 0) - totalRefundAmount)
 
   const activeCount = byStatus.reduce((acc, s) => acc + s.count, 0)
   const approvedCount = byStatus.find((s) => s._id === 'Visa Approved')?.count || 0
@@ -161,8 +176,8 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* ── 4 Executive Command KPI Cards ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* ── 5 Executive Command KPI Cards (Including Refund Amount) ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {/* KPI 1: Gross Revenue */}
         <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
           <div className="flex items-center justify-between mb-3">
@@ -182,7 +197,29 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* KPI 2: Active Clients */}
+        {/* KPI 2: Refund Amount */}
+        <Link
+          to="/admin/refunds"
+          className="bg-white p-5 rounded-2xl border border-rose-100 shadow-sm relative overflow-hidden group hover:shadow-md hover:border-rose-300 transition-all block"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-bold uppercase tracking-wider text-rose-700">Refund Amount</span>
+            <div className="w-9 h-9 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600 font-bold text-base">
+              ↩
+            </div>
+          </div>
+          <div className="text-2xl font-black text-rose-600 tracking-tight">
+            {formatInr(totalRefundAmount)}
+          </div>
+          <div className="flex items-center gap-2 mt-2 text-xs">
+            <span className="text-rose-700 font-bold bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200">
+              {refundedClients.length} cases
+            </span>
+            <span className="text-slate-500 font-medium">Net: {formatInr(netRevenue)}</span>
+          </div>
+        </Link>
+
+        {/* KPI 3: Active Clients */}
         <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Active Applications</span>
@@ -203,7 +240,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* KPI 3: Action Required */}
+        {/* KPI 4: Action Required */}
         <div className={`p-5 rounded-2xl border shadow-sm transition-all ${urgentCount > 0 ? 'bg-amber-50/40 border-amber-200' : 'bg-white border-slate-100'}`}>
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Action Required</span>
@@ -223,7 +260,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* KPI 4: Visa Success Rate */}
+        {/* KPI 5: Visa Success Rate */}
         <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Approval Rate</span>
@@ -408,8 +445,8 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* ── Bottom Row: Recent Payments & Activity Stream ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* ── Bottom Row: Recent Payments, Refund Amount & Activity Stream ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Completed Payments */}
         <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
           <div className="flex items-center justify-between mb-4">
@@ -454,6 +491,84 @@ export default function AdminDashboard() {
             ) : (
               <div className="text-xs text-slate-400 py-8 text-center">No payments recorded yet</div>
             )}
+          </div>
+        </div>
+
+        {/* Refund Amount & Disbursals Section */}
+        <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-sm font-black text-slate-900 tracking-tight flex items-center gap-1.5">
+                  <span className="text-rose-500 font-bold">↩</span> Refund Amount & Disbursals
+                </h2>
+                <p className="text-xs text-slate-400">Processed reversals & adjustments</p>
+              </div>
+              <Link to="/admin/refunds" className="text-xs font-bold text-rose-600 hover:text-rose-700">
+                View all refunds →
+              </Link>
+            </div>
+
+            {/* Quick summary badge */}
+            <div className="bg-rose-50/60 border border-rose-100 rounded-xl p-3 mb-3 flex items-center justify-between">
+              <div>
+                <div className="text-[11px] font-bold text-rose-700 uppercase tracking-wider">Total Disbursed</div>
+                <div className="text-lg font-black text-rose-600">{formatInr(totalRefundAmount)}</div>
+              </div>
+              <div className="text-right">
+                <span className="text-xs font-bold text-slate-700 bg-white px-2.5 py-1 rounded-md border border-slate-200">
+                  {refundedClients.length} refund cases
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              {refundedClients.length > 0 ? (
+                refundedClients.slice(0, 5).map((c) => (
+                  <Link
+                    key={c._id}
+                    to={`/admin/clients/${c._id}`}
+                    className="flex items-center justify-between p-2.5 rounded-xl border border-slate-50 hover:bg-rose-50/30 hover:border-rose-100 transition-all block group"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-7 h-7 rounded-lg bg-rose-100 text-rose-700 font-bold flex items-center justify-center text-xs shrink-0">
+                        {c.user?.name?.charAt(0).toUpperCase() || '?'}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-xs font-bold text-slate-900 truncate group-hover:text-rose-600 transition-colors">
+                          {c.user?.name || 'Client'}
+                          <span className="text-slate-400 font-normal"> · {c.destinationCountry || c.visaType}</span>
+                        </div>
+                        <div className="text-[11px] text-slate-400 truncate">
+                          {c.refundReason || 'Admin refund'}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <div className="text-xs font-black text-rose-600">
+                        -₹{(c.refundAmount || 0).toLocaleString('en-IN')}
+                      </div>
+                      <div className="text-[10px] font-semibold text-slate-400">
+                        {c.refundStatus === 'full' ? 'Full' : 'Partial'}
+                      </div>
+                    </div>
+                  </Link>
+                ))
+              ) : (
+                <div className="text-xs text-slate-400 py-6 text-center">
+                  No refunds processed · All collections 100% retained
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-3 pt-3 border-t border-slate-100">
+            <Link
+              to="/admin/refunds"
+              className="w-full py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all border border-rose-200"
+            >
+              Open Refunds Hub →
+            </Link>
           </div>
         </div>
 

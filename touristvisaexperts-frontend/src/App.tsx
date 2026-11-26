@@ -29,6 +29,7 @@ import AdminArticles from './pages/admin/Articles'
 import AdminPricing from './pages/admin/Pricing'
 import AdminEnquiries from './pages/admin/Enquiries'
 import AdminTestimonials from './pages/admin/Testimonials'
+import AdminRefunds from './pages/admin/Refunds'
 
 // Manager Pages
 import ManagerDashboard from './pages/manager/Dashboard'
@@ -116,6 +117,7 @@ export default function App() {
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="clients" element={<AdminClients />} />
             <Route path="clients/:id" element={<AdminClientDetail />} />
+            <Route path="refunds" element={<AdminRefunds />} />
             <Route path="team" element={<AdminTeam />} />
             <Route path="faqs" element={<AdminFAQs />} />
             <Route path="audit-logs" element={<AuditLogs />} />

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import { getClients, createClient, getTeam, assignClient } from '../../api/admin'
 import { PageSpinner } from '../../components/shared/Spinner'
 import StatusBadge from '../../components/shared/StatusBadge'
@@ -17,15 +17,18 @@ const TABS = [
   { key: 'all', label: 'All Clients' },
   { key: 'purchased', label: 'Purchased' },
   { key: 'free', label: 'Free / Unpurchased' },
+  { key: 'refunded', label: 'Refunded' },
 ]
 
 export default function AdminClients() {
+  const [searchParams] = useSearchParams()
+  const initialTab = searchParams.get('tab') || (searchParams.get('filter') === 'paid' ? 'purchased' : 'all')
   const [clients, setClients] = useState([])
   const [team, setTeam] = useState([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
-  const [tab, setTab] = useState('all')
+  const [tab, setTab] = useState(initialTab)
   const [createModal, setCreateModal] = useState(false)
   const [assignModal, setAssignModal] = useState(null)
   const [form, setForm] = useState({ name:'', email:'', phone:'', password:'', visaType:'', destinationCountry:'' })
@@ -40,7 +43,15 @@ export default function AdminClients() {
     if (search) params.search = search
     if (tab === 'purchased') params.purchased = 'true'
     if (tab === 'free') params.purchased = 'false'
-    getClients(params).then((r) => setClients(r.data.data || [])).finally(() => setLoading(false))
+    getClients(params)
+      .then((r) => {
+        let list = r.data.data || []
+        if (tab === 'refunded') {
+          list = list.filter((c) => (c.refundAmount && c.refundAmount > 0) || (c.refundStatus && c.refundStatus !== 'none'))
+        }
+        setClients(list)
+      })
+      .finally(() => setLoading(false))
   }
 
   useEffect(() => { fetchClients() }, [statusFilter, tab])
