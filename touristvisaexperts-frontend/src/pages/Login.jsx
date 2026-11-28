@@ -68,12 +68,13 @@ export default function Login() {
     setError('')
     setLoading(true)
     try {
-      const res = await login(form.email, form.password, 'client')
+      // Pass portal: 'team' to allow both Client and Team/Consultant authentication seamlessly
+      const res = await login(form.email, form.password, 'team')
       const data = res.data
 
-      // Only clients may log in through the Client Login page
-      if (data.user?.role === 'admin' || data.user?.role !== 'client') {
-        setError('Invalid credentials or unauthorized access.')
+      // Dedicated Admin Login handles administrators
+      if (data.user?.role === 'admin') {
+        setError('Admin accounts must sign in via the Admin Login page (/admin/login).')
         return
       }
 
@@ -81,7 +82,8 @@ export default function Login() {
       if (data.user.isFirstLogin) {
         navigate('/change-password', { replace: true })
       } else {
-        navigate('/client/status', { replace: true })
+        const dest = ROLE_REDIRECT[data.user.role] || (data.user.role === 'team' ? '/team/clients' : '/client/status')
+        navigate(dest, { replace: true })
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid credentials or unauthorized access.')
@@ -92,8 +94,12 @@ export default function Login() {
 
   return (
     <AuthLayout>
-      <h2 style={{ fontSize: 'clamp(28px, 2.6vw, 38px)', fontWeight: 800, color: '#0A1628', letterSpacing: '-0.035em', margin: '0 0 8px' }}>Welcome back</h2>
-      <p style={{ fontSize: 16, color: '#64748b', margin: '0 0 30px' }}>Sign in to access your client portal</p>
+      <h2 style={{ fontSize: 'clamp(28px, 2.6vw, 38px)', fontWeight: 800, color: '#0A1628', letterSpacing: '-0.035em', margin: '0 0 8px' }}>
+        Welcome back
+      </h2>
+      <p style={{ fontSize: 16, color: '#64748b', margin: '0 0 30px' }}>
+        Sign in to access your portal
+      </p>
 
       {error && (
         <div role="alert" style={{ background: '#fff1f2', border: '1px solid #fecdd3', borderRadius: 12, padding: '12px 16px', marginBottom: 20, fontSize: 13.5, color: '#e11d48', fontWeight: 600 }}>
@@ -105,14 +111,28 @@ export default function Login() {
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
         <Field label="Email address" icon="mail">
-          <input type="email" placeholder="you@example.com" value={form.email} required autoComplete="email"
-            onChange={e => setForm({ ...form, email: e.target.value })} style={inputStyle} />
+          <input
+            type="email"
+            placeholder="you@example.com"
+            value={form.email}
+            required
+            autoComplete="email"
+            onChange={e => setForm({ ...form, email: e.target.value })}
+            style={inputStyle}
+          />
         </Field>
 
         <div>
           <Field label="Password" icon="lock">
-            <input type={showPass ? 'text' : 'password'} placeholder="••••••••" value={form.password} required autoComplete="current-password"
-              onChange={e => setForm({ ...form, password: e.target.value })} style={inputStyle} />
+            <input
+              type={showPass ? 'text' : 'password'}
+              placeholder="••••••••"
+              value={form.password}
+              required
+              autoComplete="current-password"
+              onChange={e => setForm({ ...form, password: e.target.value })}
+              style={inputStyle}
+            />
             <button type="button" onClick={() => setShowPass(!showPass)} aria-label={showPass ? 'Hide password' : 'Show password'}
               style={{ position: 'absolute', right: 14, background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: 4, display: 'flex' }}>
               <Svg name={showPass ? 'eyeOff' : 'eye'} size={19} />

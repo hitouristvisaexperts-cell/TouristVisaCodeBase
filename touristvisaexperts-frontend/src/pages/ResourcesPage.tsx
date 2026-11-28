@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { motion } from 'motion/react'
 import { BookOpen, FileText, Newspaper, PlaneTakeoff, ArrowRight, Sparkles, Clock, Calendar } from 'lucide-react'
 import Navbar from '../components/Navbar'
@@ -15,6 +16,19 @@ const UPCOMING = [
 
 export default function ResourcesPage() {
   const { openConsultation, navigateTo, openArticle } = useNavigation()
+  const [articles, setArticles] = useState<ArticleData[]>(FALLBACK_ARTICLES as ArticleData[])
+
+  useEffect(() => {
+    fetch('/api/articles')
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          setArticles(json.data)
+        }
+      })
+      .catch(() => {})
+  }, [])
+
   return (
     <div className="min-h-screen bg-[#F8F9FB]">
       <Navbar />
@@ -43,35 +57,58 @@ export default function ResourcesPage() {
       {/* Published Guides Grid */}
       <section className="container mx-auto -mt-8 max-w-5xl px-4 pb-12">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-          {FALLBACK_ARTICLES.map((article) => (
+          {articles.map((article, i) => (
             <div
-              key={article._id}
+              key={article._id || i}
               onClick={() => openArticle(article as ArticleData)}
-              className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer flex flex-col group"
+              className="bg-white rounded-3xl border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.04)] hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)] transition-all duration-300 cursor-pointer flex flex-col group overflow-hidden hover:-translate-y-1"
             >
-              <div className="h-48 overflow-hidden relative">
+              <div className="h-56 sm:h-60 overflow-hidden relative bg-slate-100">
                 <img
                   src={article.imageUrl}
                   alt={article.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
-                <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-orange-600 shadow-sm">
-                  {article.tag}
-                </span>
               </div>
-              <div className="p-6 flex flex-col flex-1">
-                <div className="flex items-center gap-4 text-xs text-slate-400 mb-2.5">
-                  <span className="flex items-center gap-1"><Calendar size={13} /> {article.date}</span>
-                  <span className="flex items-center gap-1"><Clock size={13} /> {article.readTime}</span>
+
+              <div className="p-6 sm:p-7 flex flex-col flex-1">
+                {/* Category Tag */}
+                <div
+                  className="text-xs font-bold uppercase tracking-wider mb-2"
+                  style={{ color: i % 2 === 0 ? '#2563eb' : (article.tagColor || '#ea580c') }}
+                >
+                  {article.tag || 'VISA GUIDE'}
                 </div>
-                <h3 className="text-lg font-bold text-slate-900 mb-2 group-hover:text-orange-500 transition-colors">
+
+                {/* Title */}
+                <h3
+                  className="text-xl sm:text-2xl font-black uppercase tracking-tight mb-3 transition-colors line-clamp-2"
+                  style={{ color: i % 2 === 0 ? '#ea580c' : '#0A1628' }}
+                >
                   {article.title}
                 </h3>
-                <p className="text-sm text-slate-600 leading-relaxed line-clamp-2 mb-4 flex-1">
+
+                {/* Excerpt */}
+                <p className="text-sm text-slate-500 leading-relaxed line-clamp-3 mb-6 flex-1 font-normal">
                   {article.excerpt}
                 </p>
-                <div className="flex items-center gap-1.5 text-sm font-bold text-orange-500 mt-auto">
-                  Read full guide <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+
+                {/* Bottom Meta & Read Action */}
+                <div className="flex items-center justify-between pt-4 mt-auto border-t border-slate-100/90 text-xs">
+                  <div className="flex items-center gap-3 sm:gap-4 text-slate-500 font-medium">
+                    <span className="flex items-center gap-1.5">
+                      <Calendar size={14} className="text-orange-400" />
+                      {article.date}
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <Clock size={14} className="text-orange-400" />
+                      {article.readTime}
+                    </span>
+                  </div>
+
+                  <span className="flex items-center gap-1 font-bold text-sm text-orange-500 group-hover:translate-x-1 transition-transform">
+                    Read &rarr;
+                  </span>
                 </div>
               </div>
             </div>

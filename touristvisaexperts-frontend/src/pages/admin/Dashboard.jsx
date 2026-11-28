@@ -76,7 +76,12 @@ export default function AdminDashboard() {
     Promise.all([
       getDashboard().then((r) => r.data.data),
       getClients({ limit: 100 })
-        .then((r) => r.data.data?.clients || r.data.clients || [])
+        .then((r) => {
+          if (Array.isArray(r?.data?.data)) return r.data.data
+          if (Array.isArray(r?.data?.data?.clients)) return r.data.data.clients
+          if (Array.isArray(r?.data?.clients)) return r.data.clients
+          return []
+        })
         .catch(() => []),
     ])
       .then(([dashData, clData]) => {
@@ -109,7 +114,10 @@ export default function AdminDashboard() {
     (c) => (c.refundAmount && c.refundAmount > 0) || (c.refundStatus && c.refundStatus !== 'none')
   )
   const totalRefundAmount = refundedClients.reduce((sum, c) => sum + (c.refundAmount || 0), 0)
-  const netRevenue = Math.max(0, (revenue.total || 0) - totalRefundAmount)
+  const grossRevenue = (revenue.total && revenue.total > 0)
+    ? revenue.total
+    : clientsData.reduce((sum, c) => sum + (c.paidAmount || 0), 0)
+  const netRevenue = Math.max(0, grossRevenue - totalRefundAmount)
 
   const activeCount = byStatus.reduce((acc, s) => acc + s.count, 0)
   const approvedCount = byStatus.find((s) => s._id === 'Visa Approved')?.count || 0
@@ -178,29 +186,55 @@ export default function AdminDashboard() {
 
       {/* ── 5 Executive Command KPI Cards (Including Refund Amount) ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        {/* KPI 1: Gross Revenue */}
+        {/* KPI 1: Gross & Net Revenue */}
         <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group hover:shadow-md transition-all">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Revenue (GMV)</span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                {totalRefundAmount > 0 ? 'Total Revenue (Net)' : 'Total Revenue (GMV)'}
+              </span>
+              {totalRefundAmount > 0 && (
+                <span className="text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 tracking-tight">
+                  Net
+                </span>
+              )}
+            </div>
             <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 font-bold text-sm">
               ₹
             </div>
           </div>
           <div className="text-2xl font-black text-slate-900 tracking-tight">
-            {formatInr(revenue.total)}
+            {formatInr(totalRefundAmount > 0 ? netRevenue : grossRevenue)}
           </div>
-          <div className="flex items-center gap-2 mt-2 text-xs">
-            <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-              {formatInr(revenue.thisMonth)}
-            </span>
-            <span className="text-slate-400">this month ({revenue.transactions} orders)</span>
+          <div className="flex items-center gap-2 mt-2 text-xs flex-wrap">
+            {totalRefundAmount > 0 ? (
+              <>
+                <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                  Gross: {formatInr(grossRevenue)}
+                </span>
+                <span className="text-rose-600 font-semibold bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200">
+                  -{formatInr(totalRefundAmount)} ref.
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                  {formatInr(revenue.thisMonth)}
+                </span>
+                <span className="text-slate-400">this month ({revenue.transactions} orders)</span>
+              </>
+            )}
           </div>
         </div>
 
         {/* KPI 2: Refund Amount */}
         <Link
           to="/admin/refunds"
-          className="bg-white p-5 rounded-2xl border border-rose-100 shadow-sm relative overflow-hidden group hover:shadow-md hover:border-rose-300 transition-all block"
+          className={`p-5 rounded-2xl border shadow-sm relative overflow-hidden group hover:shadow-md transition-all block ${
+            totalRefundAmount > 0
+              ? 'bg-rose-50/40 border-rose-200 hover:border-rose-400'
+              : 'bg-white border-rose-100 hover:border-rose-300'
+          }`}
         >
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-bold uppercase tracking-wider text-rose-700">Refund Amount</span>
@@ -213,7 +247,7 @@ export default function AdminDashboard() {
           </div>
           <div className="flex items-center gap-2 mt-2 text-xs">
             <span className="text-rose-700 font-bold bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200">
-              {refundedClients.length} cases
+              {refundedClients.length} {refundedClients.length === 1 ? 'case' : 'cases'}
             </span>
             <span className="text-slate-500 font-medium">Net: {formatInr(netRevenue)}</span>
           </div>

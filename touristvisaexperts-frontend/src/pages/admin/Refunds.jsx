@@ -38,7 +38,12 @@ export default function AdminRefunds() {
     setLoading(true)
     getClients({ limit: 100 })
       .then((res) => {
-        setClients(res.data.data?.clients || res.data.clients || [])
+        const list = Array.isArray(res?.data?.data)
+          ? res.data.data
+          : (Array.isArray(res?.data?.data?.clients)
+            ? res.data.data.clients
+            : (Array.isArray(res?.data?.clients) ? res.data.clients : []))
+        setClients(list)
       })
       .catch((err) => console.error('Failed to load clients for refunds:', err))
       .finally(() => setLoading(false))
@@ -105,7 +110,7 @@ export default function AdminRefunds() {
     setSuccess('')
     try {
       await processRefund(refundModalClient._id, {
-        amount: amt,
+        refundAmount: amt,
         reason: refundForm.reason.trim() || 'Admin processed refund',
       })
       setSuccess('Refund recorded successfully!')
@@ -396,18 +401,6 @@ export default function AdminRefunds() {
                         >
                           Details
                         </Link>
-                        {c.isPurchased && !isFullyRefunded && (
-                          <button
-                            type="button"
-                            onClick={() => openRefundModal(c)}
-                            style={{
-                              padding: '6px 10px', borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: 'pointer',
-                              background: '#fef2f2', color: '#dc2626', border: '1px solid #fecaca',
-                            }}
-                          >
-                            + Refund
-                          </button>
-                        )}
                       </div>
                     </td>
                   </tr>

@@ -1,9 +1,0 @@
-User-agent: *
-Allow: /
-
-# Personal / transactional pages — no value in search results
-Disallow: /checkout
-Disallow: /client-portal
-Disallow: /article
-
-Sitemap: https://touristvisaexperts.com/sitemap.xml
